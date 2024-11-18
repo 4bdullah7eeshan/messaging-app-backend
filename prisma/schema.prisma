@@ -8,8 +8,19 @@ datasource db {
 }
 
 model User {
-  id        Int  @id @default(autoincrement())
-         
+  id            Int       @id @default(autoincrement())
+  displayName   String?   // (Optional) Full name of user will be stored here.
+  username      String    @unique // Set unique usernames for each user.
+  email         String    @unique // Emails, ofcourse must be unique.
+  password      String
+  avatarUrl     String?   // (Optional) Profile picture/DP. It will be a cloudinary URL. Handle default place holder in frontend.
+  bio           String?   // (Optional)
+  isOnline      Boolean
+  lastActive    DateTime  @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt  // Comes into action whenever the User updates any profile info.
+  // Put relationships later
+
 }
 
 model Friend {
