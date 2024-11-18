@@ -8,24 +8,35 @@ datasource db {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  displayName   String?   // (Optional) Full name of user will be stored here.
-  username      String    @unique // Set unique usernames for each user.
-  email         String    @unique // Emails, ofcourse must be unique.
-  password      String
-  avatarUrl     String?   // (Optional) Profile picture/DP. It will be a cloudinary URL. Handle default place holder in frontend.
-  bio           String?   // (Optional)
-  isOnline      Boolean
-  lastActive    DateTime  @updatedAt
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt  // Comes into action whenever the User updates any profile info.
-  // Put relationships later
+  id                Int       @id @default(autoincrement())
+  displayName       String?   // (Optional) Full name of user will be stored here.
+  username          String    @unique // Set unique usernames for each user.
+  email             String    @unique // Emails, ofcourse must be unique.
+  password          String
+  avatarUrl         String?   // (Optional) Profile picture/DP. It will be a cloudinary URL. Handle default place holder in frontend.
+  bio               String?   // (Optional)
+  isOnline          Boolean
+  lastActive        DateTime  @updatedAt
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt  // Comes into action whenever the User updates any profile info.
 
+  messagesSent      Message[] @relation("Sender")
+  messagesReceived  Message[] @relation("Receiver")
+  friendsSent       Friend[]  @relation("SentFriendship")
+  friends           Friend[]  @relation("Friends")
+  groups            Group[]   @relation("Members")
 }
 
-model Friend {
-  id        Int  @id @default(autoincrement())
+// There are two stages in the process of becoming friends. A request must be sent and must be accepted. 
 
+model Friend {
+  id       Int  @id @default(autoincrement())
+  userId   Int
+  friendId Int
+  user     User @relation("SentFriendship", fields: [userId], references: [id])
+  friend   User @relation("Friends", fields: [friendId], references: [id])
+
+  @@unique([userId, friendId]) // To prevent duplicate friendships
 }
 
 model Group {
@@ -35,8 +46,9 @@ model Group {
   description String?   // (Optional) A group description describing the purpose or motto behind the group.
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now()) // Comes into action whenever changes are made to Group properties.
-  // Put relationships later
-
+  
+  members     User[]   @relation("Members")
+  messages    Message[]
 }
 
 // Create a separate model for messages in groups if the following does not work. 
@@ -46,14 +58,15 @@ model Message {
   receiverId  Int?      // (Optional) Because a message could be sent in a group as well.       
   groupId     Int?      // (Optional) Same as above
   timeStamp   DateTime  @default(now())
-  
   content     String?   // (Optional)
   imageUrl    String?   // (Optional) For sending images. It will be a cloudinary URL.
-  // Both content and imageUrl being optional does not mean sending empty messages.
-  // When a user wants to send a message, we can not oblige it to send a test/image.
-  // Ofcourse, we need to handle sending empty messages. This can be tackled in backend.  
   
-  // Put relationships later
-
+  sender      User     @relation("Sender", fields: [senderId], references: [id])
+  receiver    User?    @relation("Receiver", fields: [receiverId], references: [id])
+  group       Group?   @relation(fields: [groupId], references: [id])
 
 }
+// Note:
+// Both content and imageUrl being optional does not mean sending empty messages.
+// When a user wants to send a message, we can not oblige it to send a test/image.
+// Ofcourse, we need to handle sending empty messages. This can be tackled in backend.
