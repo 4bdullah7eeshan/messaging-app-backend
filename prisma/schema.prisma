@@ -29,7 +29,13 @@ model Friend {
 }
 
 model Group {
-  id        Int  @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
+  name        String    // Name of the group
+  avatarUrl   String?   // (Optional) An image for the group. It will be a cloudinary URL. Handle default place holder in frontend.
+  description String?   // (Optional) A group description describing the purpose or motto behind the group.
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) // Comes into action whenever changes are made to Group properties.
+  // Put relationships later
 
 }
 
