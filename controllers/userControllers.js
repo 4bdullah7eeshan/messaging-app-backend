@@ -11,6 +11,15 @@ const createUser = asyncHandler(async (req, res) => {
     
 });
 
+const loginUser = asyncHandler(async (req, res) => {
+
+});
+
+
+const logoutUser = asyncHandler(async (req, res) => {
+
+});
+
 const getUser = asyncHandler(async (req, res) => {
     
 });
