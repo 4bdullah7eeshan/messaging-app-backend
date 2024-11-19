@@ -103,8 +103,14 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
 
 const updateUser = asyncHandler(async (req, res) => {
-    
+    // Think about this!
+    // What to update? All entities such as DP/bio/display name/ or just one? How to manage both cases?
+    // Create different controllers for each entity update?
+    // Password changes? Username and email changes?
+    // If username/email changes, then need to ensure uniqueness too
+
 });
+
 
 const deleteUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
