@@ -76,8 +76,18 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 
 const getUser = asyncHandler(async (req, res) => {
-    
+    const { id } = req.params;
+
+    // Fetch the user from db
+    const user = await prisma.user.findUnique({ where: { id: Number(id) } });
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    res.status(200).json(user);
 });
+
 
 const getAllUsers = asyncHandler(async (req, res) => {
 
