@@ -90,8 +90,17 @@ const getUser = asyncHandler(async (req, res) => {
 
 
 const getAllUsers = asyncHandler(async (req, res) => {
+    const users = await prisma.user.findMany({
+        select: {
+            id: true,
+            username: true,
+            // Todo: Get more properties based on requirement.
+        },
+    });
 
+    res.status(200).json(users);
 });
+
 
 const updateUser = asyncHandler(async (req, res) => {
     
