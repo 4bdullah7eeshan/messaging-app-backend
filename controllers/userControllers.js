@@ -1,7 +1,11 @@
 const asyncHandler = require("express-async-handler");
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const prisma = new PrismaClient();
+const jwtSecret = process.env.JWT_SECRET;
+const jwtExpiry = "1h";
 
 const createUser = asyncHandler(async (req, res) => {
     
