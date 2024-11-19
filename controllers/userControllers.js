@@ -88,5 +88,10 @@ const updateUser = asyncHandler(async (req, res) => {
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
-    
+    const { id } = req.params;
+
+    // Delete the user
+    await prisma.user.delete({ where: { id: Number(id) } });
+
+    res.status(200).json({ message: "User deleted successfully" });
 });
