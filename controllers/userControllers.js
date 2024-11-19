@@ -40,8 +40,34 @@ const createUser = asyncHandler(async (req, res) => {
 
 
 const loginUser = asyncHandler(async (req, res) => {
+    const { email, password } = req.body; // Chose to login the user based on email, not username
 
+    // Check if both email and password are provided
+    if (!email || !password) {
+        res.status(400);
+        throw new Error("Email and password are required");
+    }
+
+    // Find the user in db
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+        res.status(401);
+        throw new Error("Invalid credentials");
+    }
+
+    // Compare the password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+        res.status(401);
+        throw new Error("Invalid credentials");
+    }
+
+    // Generate a JWT
+    const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: jwtExpiry });
+
+    res.status(200).json({ message: "Login successful", token, user });
 });
+
 
 
 const logoutUser = asyncHandler(async (req, res) => {
