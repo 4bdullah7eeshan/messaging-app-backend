@@ -4,8 +4,10 @@ const {
     isUnique,
     isValidEmail,
     matchesField,
+    iIntegerValue,
 } = require("./validationHelpers");
 const handleValidationErrors = require("../middlewares/handleValidationErrors");
+const { isIntegerValue } = require("../helpers/validationHelpers");
 
 const validateCreateUser = [
     notEmpty("username"),
@@ -26,8 +28,14 @@ const validateLoginUser = [
 
 ];
 
+const validateGetUser = [
+    isIntegerValue("id"),
+
+]
+
 module.exports = {
     validateCreateUser,
     validateLoginUser,
+    validateGetUser,
 }
 
