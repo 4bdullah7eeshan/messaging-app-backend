@@ -45,7 +45,6 @@ const isValidUrl = (fieldName, customMessage) =>
                 
 const isString = (fieldName, customMessage) =>
     body(fieldName)
-        .optional()
         .isString()
         .withMessage(customMessage || `${fieldName} must be a string`);
         
