@@ -25,8 +25,54 @@ const createMessage = asyncHandler(async (req, res) => {
 });
 
 const getMessages = asyncHandler(async (req, res) => {
-    
+    const { targetId, isGroup } = req.params;
+    const { lastMessageId } = req.query;  // Get ID of the last message loaded
+    const userId = req.user.id;
+    const messagesCount = 20;  // Set message count: number of messages to load per request
+
+    let messages;
+
+    if (isGroup) {
+        // Group messages
+        messages = await prisma.message.findMany({
+            where: { groupId: parseInt(targetId) },
+            orderBy: { createdAt: 'desc' }, // Sort in desc order
+            take: messagesCount,
+            cursor: lastMessageId ? { id: lastMessageId } : undefined,  // Start from the last loaded message
+            include: { sender: true },
+        });
+    } else {
+        // Private messages
+        messages = await prisma.message.findMany({
+            where: {
+                OR: [
+                    { senderId: userId, receiverId: parseInt(targetId) },
+                    { senderId: parseInt(targetId), receiverId: userId },
+                ],
+            },
+            orderBy: { createdAt: 'desc' },
+            take: messagesCount,
+            cursor: lastMessageId ? { id: lastMessageId } : undefined,
+            include: { sender: true },
+        });
+    }
+
+    // If no messages are found, return an empty array instead of 404
+    if (!messages || messages.length === 0) {
+        return res.status(200).json({
+            messages: [],
+            lastMessageId: null,  // No more messages, set lastMessageId to null
+        });
+    }
+
+    // Send the messages, including the ID of the last message for the next query
+    res.status(200).json({
+        messages,
+        lastMessageId: messages[messages.length - 1]?.id,  // ID of the last message loaded
+    });
 });
+
+
 
 const getMessage = asyncHandler(async (req, res) => {
     const { messageId } = req.params;
