@@ -183,6 +183,45 @@ const removeUserFromGroup = asyncHandler(async (req, res) => {
 });
 
 const joinGroup = asyncHandler(async (req, res) => {
+    const { groupId } = req.params;
+    const userId = req.user.id;
+
+    const group = await prisma.group.findUnique({
+        where: { id: parseInt(groupId) },
+    });
+
+    if (!group) {
+        res.status(404).json({ message: "Group not found" });
+        return;
+    }
+
+    // Check if the user is already a member
+    const isMember = await prisma.group.findMany({
+        where: {
+            id: parseInt(groupId),
+            members: {
+                some: {
+                    id: userId,
+                },
+            },
+        },
+    });
+
+    if (isMember.length > 0) {
+        res.status(400).json({ message: "You are already a member of this group" });
+        return;
+    }
+
+    await prisma.group.update({
+        where: { id: parseInt(groupId) },
+        data: {
+            members: {
+                connect: { id: userId },
+            },
+        },
+    });
+
+    res.status(200).json({ message: "Successfully joined the group" });
 
 });
 
