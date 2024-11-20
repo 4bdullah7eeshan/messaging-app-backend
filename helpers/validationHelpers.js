@@ -1,4 +1,5 @@
 const { body } = require("express-validator");
+const { recordExists } = require("../helpers/prismaHelpers");
 
 const notEmpty = (fieldName, customMessage) =>
     body(fieldName)
@@ -17,4 +18,10 @@ const isValidEmail = (fieldName, customMessage) =>
     body(fieldName)
         .isEmail()
         .withMessage(customMessage || `${fieldName} is not a valid email.`);
+
+
+const isUnique = (fieldName, model, dbField, customMessage) => 
+    body(fieldName)
+        .custom((value) => recordExists(model, dbField, value))
+        .withMessage(customMessage || `${fieldName} is already in use`);
 
