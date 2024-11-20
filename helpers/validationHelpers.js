@@ -25,10 +25,17 @@ const isUnique = (fieldName, model, dbField, customMessage) =>
         .custom((value) => recordExists(model, dbField, value))
         .withMessage(customMessage || `${fieldName} is already in use`);
 
+const matchesField = (fieldName, otherFieldName, customMessage) =>
+    body(fieldName)
+        .custom((value, { req }) => value === req.body[otherFieldName])
+        .withMessage(customMessage || `${fieldName} must match ${otherFieldName}`);
+                
+
 module.exports = {
     notEmpty,
     hasLength,
     isValidEmail,
     isUnique,
+    matchesField,
 }
 
