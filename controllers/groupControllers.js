@@ -109,6 +109,45 @@ const getAllGroupMembers = asyncHandler(async (req, res) => {
 
 
 const addUserToGroup = asyncHandler(async (req, res) => {
+    const { groupId, userId } = req.params;
+
+    const group = await prisma.group.findUnique({
+        where: { id: Number(groupId) },
+    });
+
+    // Check if group exists in the first place
+    if (!group) {
+        res.status(404).json({ message: "Group not found" });
+        return;
+    }
+
+    // Ensure the user adding members is an admin
+    if (group.adminId !== req.user.id) {
+        res.status(403).json({ message: "Only the admin can add members" });
+        return;
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { id: Number(userId) },
+    });
+
+    // Check if the user being added exists
+    if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+    }
+
+    // Just update the group members
+    await prisma.group.update({
+        where: { id: Number(groupId) },
+        data: {
+            members: {
+                connect: { id: user.id },
+            },
+        },
+    });
+
+    res.status(200).json({ message: "User added to group successfully" });
 
 });
 
