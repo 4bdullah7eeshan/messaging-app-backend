@@ -12,3 +12,9 @@ const hasLength = (fieldName, min, max, customMessage) =>
         .isLength({ min, max })
         .withMessage(customMessage || `${fieldName} must be between ${min} and ${max} characters`);
 
+
+const isValidEmail = (fieldName, customMessage) =>
+    body(fieldName)
+        .isEmail()
+        .withMessage(customMessage || `${fieldName} is not a valid email.`);
+
