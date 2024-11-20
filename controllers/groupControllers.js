@@ -91,6 +91,19 @@ const getAllUsersGroups = asyncHandler(async (req, res) => {
 });
 
 const getAllGroupMembers = asyncHandler(async (req, res) => {
+    const { groupId } = req.params;
+
+    const group = await prisma.group.findUnique({
+        where: { id: Number(groupId) },
+        include: { members: true },
+    });
+
+    if (!group) {
+        res.status(404).json({ message: "Group not found" });
+        return;
+    }
+
+    res.status(200).json(group.members);
 
 });
 
