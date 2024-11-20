@@ -54,8 +54,26 @@ const getFriendRequest = asyncHandler(async (req, res) => {
 });
 
 const acceptFriendRequest = asyncHandler(async (req, res) => {
+    const requestId = parseInt(req.params.requestId);
+    const userId = req.user.id;
 
+    const friendRequest = await prisma.friend.findUnique({
+        where: { id: requestId },
+    });
+
+    if (!friendRequest) {
+        return res.status(404).json({ message: "Friend request not found." });
+    }
+
+    if (friendRequest.friendId !== userId) {
+        return res.status(403).json({ message: "You are not authorized to accept this request." });
+    }
+
+    await prisma.friend.update({ where: { id: requestId } });
+
+    res.status(200).json({ message: "Friend request accepted." });
 });
+
 
 const rejectFriendRequest = asyncHandler(async (req, res) => {
 
