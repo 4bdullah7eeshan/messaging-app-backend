@@ -28,11 +28,13 @@ const validateLoginUser = [
     notEmpty("email"),
     notEmpty("password"),
     isValidEmail("email"),
+    handleValidationErrors,
 
 ];
 
 const validateGetUser = [
     isIntegerValue("id"),
+    handleValidationErrors,
 
 ]
 
@@ -42,11 +44,13 @@ const validateUpdateUser = [
     optionalWrapper(isString("displayName", "Display name must be a string")),
     optionalWrapper(hasLength("bio", 0, 200, "Bio must be of maximum 200 characters")),
     optionalWrapper(hasLength("displayName", 0, 50, "Display Name must of maximum 50 characters")),
+    handleValidationErrors,
 
 ]
 
 const validateDeleteUser = [
     isIntegerValue("id"),
+    handleValidationErrors,
 ]
 
 module.exports = {
