@@ -44,8 +44,23 @@ const getMessage = asyncHandler(async (req, res) => {
 });
 
 const updateMessage = asyncHandler(async (req, res) => {
-    
+    const { messageId } = req.params;
+    const { content } = req.body;
+
+    const message = await prisma.message.findUnique({ where: { id: parseInt(messageId) } });
+
+    if (!message) {
+        return res.status(404).json({ message: "Message not found" });
+    }
+
+    const updatedMessage = await prisma.message.update({
+        where: { id: parseInt(messageId) },
+        data: { content },
+    });
+
+    res.status(200).json(updatedMessage);
 });
+
 
 const deleteMessage = asyncHandler(async (req, res) => {
     
