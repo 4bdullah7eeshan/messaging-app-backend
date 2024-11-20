@@ -24,8 +24,17 @@ const createGroup = asyncHandler(async (req, res) => {
 
 
 const getGroup = asyncHandler(async (req, res) => {
+    const { id } = req.params;
 
+    const group = await prisma.group.findUnique({ where: { id: Number(id) } });
+    if (!group) {
+        res.status(404);
+        throw new Error("Group not found");
+    }
+
+    res.status(200).json(group);
 });
+
 
 
 const updateGroup = asyncHandler(async (req, res) => {
@@ -64,5 +73,5 @@ const exitGroup = asyncHandler(async (req, res) => {
 
 module.exports = {
     createGroup,
-    
+
 }
