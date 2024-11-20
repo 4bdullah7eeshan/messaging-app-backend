@@ -18,7 +18,7 @@ const createGroup = asyncHandler(async (req, res) => {
     });
     // Think if you want to allow user to put all group info like description/DP at the time of creation
 
-    res.status(201).json({ message: "Group created successfully", group});
+    res.status(201).json({ message: "Group created successfully", group });
 
 });
 
@@ -38,7 +38,15 @@ const getGroup = asyncHandler(async (req, res) => {
 
 
 const updateGroup = asyncHandler(async (req, res) => {
+    const { groupId } = req.params;
+    const { name, avatarUrl, description } = req.body;
 
+    const group = await prisma.group.update({
+        where: { id: Number(groupId) },
+        data: { name, avatarUrl, description },
+    });
+
+    res.status(200).json(group);
 });
 
 
