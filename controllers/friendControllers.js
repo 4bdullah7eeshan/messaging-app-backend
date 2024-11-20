@@ -126,5 +126,19 @@ const deleteFriend = asyncHandler(async (req, res) => {
 
 
 const getAllFriendRequests = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
 
+    // Fetch pending incoming requests
+    const incomingRequests = await prisma.friend.findMany({
+        where: { friendId: userId },
+        include: { user: true },
+    });
+
+    // Fetch pending outgoing requests
+    const outgoingRequests = await prisma.friend.findMany({
+        where: { userId: userId },
+        include: { friend: true },
+    });
+
+    res.status(200).json({ incomingRequests, outgoingRequests });
 });
