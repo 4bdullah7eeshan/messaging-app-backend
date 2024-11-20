@@ -39,7 +39,18 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
 
 
 const getFriendRequest = asyncHandler(async (req, res) => {
+    const requestId = parseInt(req.params.requestId);
 
+    const friendRequest = await prisma.friend.findUnique({
+        where: { id: requestId },
+        include: { user: true, friend: true }
+    });
+
+    if (!friendRequest) {
+        return res.status(404).json({ message: "Friend request not found." });
+    }
+
+    res.status(200).json(friendRequest);
 });
 
 const acceptFriendRequest = asyncHandler(async (req, res) => {
