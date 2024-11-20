@@ -41,7 +41,12 @@ const isValidUrl = (fieldName, customMessage) =>
         .isURL()
         .withMessage(customMessage || `${fieldName} must ba a valid URL`);
                 
-
+const isString = (fieldName, customMessage) =>
+    body(fieldName)
+        .optional()
+        .isString()
+        .withMessage(customMessage || `${fieldName} must be a string`);
+        
 module.exports = {
     notEmpty,
     hasLength,
@@ -50,5 +55,6 @@ module.exports = {
     matchesField,
     isIntegerValue,
     isValidUrl,
+    isString,
 }
 
