@@ -32,6 +32,7 @@ model User {
   friendsSent       Friend[]  @relation("SentFriendship")
   friends           Friend[]  @relation("Friends")
   groups            Group[]   @relation("Members")
+  adminOfGroups     Group[]   @relation("GroupAdmin")
 }
 
 // There are two stages in the process of becoming friends. A request must be sent and must be accepted. 
@@ -54,6 +55,9 @@ model Group {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now()) // Comes into action whenever changes are made to Group properties.
   
+  adminId     Int       // Foreign key to the User model for the admin
+  admin       User      @relation("GroupAdmin", fields: [adminId], references: [id]) // Relation to admin user
+
   members     User[]   @relation("Members")
   messages    Message[]
 }
