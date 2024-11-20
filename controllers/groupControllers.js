@@ -254,6 +254,11 @@ const exitGroup = asyncHandler(async (req, res) => {
         return;
     }
 
+    if (group.adminId === userId) {
+        res.status(403).json({ message: "Admin cannot leave the group" });
+        return;
+    }
+
     await prisma.group.update({
         where: { id: parseInt(groupId) },
         data: {
