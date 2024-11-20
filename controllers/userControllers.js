@@ -31,16 +31,18 @@ const loginUser = asyncHandler(async (req, res) => {
 
     // Find the user in db
     const user = await prisma.user.findUnique({ where: { email } });
+
+    // If the user does not exist in the db throw an error. 401 coz auth.
     if (!user) {
-        res.status(401);
-        throw new Error("Invalid credentials");
+        return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Compare the password
     const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    // If the passwords do not match, throw an error
     if (!isPasswordValid) {
-        res.status(401);
-        throw new Error("Invalid credentials");
+        return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Generate a JWT
@@ -51,6 +53,11 @@ const loginUser = asyncHandler(async (req, res) => {
 
 
 const logoutUser = asyncHandler(async (req, res) => {
+    // No need to search db, just check authentication. 401 coz auth.
+    if (!req.user) {
+        return res.status(401).json({ message: "User is not authenticated" });
+    }
+
     req.logout();
     res.status(200).json({ message: "User logged out successfully" });
 });
@@ -61,9 +68,10 @@ const getUser = asyncHandler(async (req, res) => {
 
     // Fetch the user from db
     const user = await prisma.user.findUnique({ where: { id: Number(id) } });
+
+    // If user does not exist in db return error
     if (!user) {
-        res.status(404);
-        throw new Error("User not found");
+        return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json(user);
@@ -92,6 +100,14 @@ const updateUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { avatarUrl, bio, displayName } = req.body;
 
+    // Fetch the user from the db
+    const user = await prisma.user.findUnique({ where: { id: Number(id) } });
+
+    // If the user does not exist, throw an error
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
     const updatedUser = await prisma.user.update({
         where: { id: Number(id) },
         data: {
@@ -108,6 +124,14 @@ const updateUser = asyncHandler(async (req, res) => {
 
 const deleteUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
+
+    // Fetch the user from the db
+    const user = await prisma.user.findUnique({ where: { id: Number(id) } });
+
+    // If the user does not exist, throw an error
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
 
     // Delete the user
     await prisma.user.delete({ where: { id: Number(id) } });

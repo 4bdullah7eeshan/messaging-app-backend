@@ -28,8 +28,7 @@ const getGroup = asyncHandler(async (req, res) => {
 
     const group = await prisma.group.findUnique({ where: { id: Number(id) } });
     if (!group) {
-        res.status(404);
-        throw new Error("Group not found");
+        return res.status(404).json({ message: "Group not found" });
     }
 
     res.status(200).json(group);
@@ -41,12 +40,17 @@ const updateGroup = asyncHandler(async (req, res) => {
     const { groupId } = req.params;
     const { name, avatarUrl, description } = req.body;
 
-    const group = await prisma.group.update({
+    const group = await prisma.group.findUnique({ where: { id: Number(groupId) } });
+    if (!group) {
+        return res.status(404).json({ message: "Group not found" });
+    }
+
+    const updatedGroup = await prisma.group.update({
         where: { id: Number(groupId) },
         data: { name, avatarUrl, description },
     });
 
-    res.status(200).json(group);
+    res.status(200).json(updatedGroup);
 });
 
 
