@@ -1,6 +1,8 @@
 const { body, param } = require("express-validator");
 const { recordExists } = require("../helpers/prismaHelpers");
 
+const optionalWrapper = (rule) => rule.optional();
+
 const notEmpty = (fieldName, customMessage) =>
     body(fieldName)
         .trim()
@@ -48,6 +50,7 @@ const isString = (fieldName, customMessage) =>
         .withMessage(customMessage || `${fieldName} must be a string`);
         
 module.exports = {
+    optionalWrapper,
     notEmpty,
     hasLength,
     isValidEmail,
