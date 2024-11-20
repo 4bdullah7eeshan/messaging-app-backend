@@ -67,7 +67,7 @@ const getUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
     // Fetch the user from db
-    const user = await prisma.user.findUnique({ where: { id: Number(id) } });
+    const user = await prisma.user.findUnique({ where: { id: parseInt(id) } });
 
     // If user does not exist in db return error
     if (!user) {
@@ -101,7 +101,7 @@ const updateUser = asyncHandler(async (req, res) => {
     const { avatarUrl, bio, displayName } = req.body;
 
     // Fetch the user from the db
-    const user = await prisma.user.findUnique({ where: { id: Number(id) } });
+    const user = await prisma.user.findUnique({ where: { id: parseInt(id) } });
 
     // If the user does not exist, throw an error
     if (!user) {
@@ -109,7 +109,7 @@ const updateUser = asyncHandler(async (req, res) => {
     }
 
     const updatedUser = await prisma.user.update({
-        where: { id: Number(id) },
+        where: { id: parseInt(id) },
         data: {
             avatarUrl,
             bio,
@@ -126,7 +126,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
     // Fetch the user from the db
-    const user = await prisma.user.findUnique({ where: { id: Number(id) } });
+    const user = await prisma.user.findUnique({ where: { id: parseInt(id) } });
 
     // If the user does not exist, throw an error
     if (!user) {
@@ -134,7 +134,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     }
 
     // Delete the user
-    await prisma.user.delete({ where: { id: Number(id) } });
+    await prisma.user.delete({ where: { id: parseInt(id) } });
 
     res.status(200).json({ message: "User deleted successfully" });
 });

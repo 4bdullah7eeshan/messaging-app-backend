@@ -26,7 +26,7 @@ const createGroup = asyncHandler(async (req, res) => {
 const getGroup = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    const group = await prisma.group.findUnique({ where: { id: Number(id) } });
+    const group = await prisma.group.findUnique({ where: { id: parseInt(id) } });
     if (!group) {
         return res.status(404).json({ message: "Group not found" });
     }
@@ -40,13 +40,13 @@ const updateGroup = asyncHandler(async (req, res) => {
     const { groupId } = req.params;
     const { name, avatarUrl, description } = req.body;
 
-    const group = await prisma.group.findUnique({ where: { id: Number(groupId) } });
+    const group = await prisma.group.findUnique({ where: { id: parseInt(groupId) } });
     if (!group) {
         return res.status(404).json({ message: "Group not found" });
     }
 
     const updatedGroup = await prisma.group.update({
-        where: { id: Number(groupId) },
+        where: { id: parseInt(groupId) },
         data: { name, avatarUrl, description },
     });
 
@@ -59,7 +59,7 @@ const deleteGroup = asyncHandler(async (req, res) => {
     const userId = req.user.id; // Need this to know who is attempting to delete the group.
 
     const group = await prisma.group.findUnique({
-        where: { id: Number(groupId) },
+        where: { id: parseInt(groupId) },
     });
 
     // Check if the group exists
@@ -94,7 +94,7 @@ const getAllGroupMembers = asyncHandler(async (req, res) => {
     const { groupId } = req.params;
 
     const group = await prisma.group.findUnique({
-        where: { id: Number(groupId) },
+        where: { id: parseInt(groupId) },
         include: { members: true },
     });
 
@@ -112,7 +112,7 @@ const addUserToGroup = asyncHandler(async (req, res) => {
     const { groupId, userId } = req.params;
 
     const group = await prisma.group.findUnique({
-        where: { id: Number(groupId) },
+        where: { id: parseInt(groupId) },
     });
 
     // Check if group exists in the first place
@@ -128,7 +128,7 @@ const addUserToGroup = asyncHandler(async (req, res) => {
     }
 
     const user = await prisma.user.findUnique({
-        where: { id: Number(userId) },
+        where: { id: parseInt(userId) },
     });
 
     // Check if the user being added exists
@@ -139,7 +139,7 @@ const addUserToGroup = asyncHandler(async (req, res) => {
 
     // Just update the group members
     await prisma.group.update({
-        where: { id: Number(groupId) },
+        where: { id: parseInt(groupId) },
         data: {
             members: {
                 connect: { id: user.id },
@@ -155,7 +155,7 @@ const removeUserFromGroup = asyncHandler(async (req, res) => {
     const { groupId, userId } = req.params;
 
     const group = await prisma.group.findUnique({
-        where: { id: Number(groupId) },
+        where: { id: parseInt(groupId) },
     });
 
     if (!group) {
@@ -170,10 +170,10 @@ const removeUserFromGroup = asyncHandler(async (req, res) => {
 
     // Just disconnect the user from the group
     await prisma.group.update({
-        where: { id: Number(groupId) },
+        where: { id: parseInt(groupId) },
         data: {
             members: {
-                disconnect: { id: Number(userId) },
+                disconnect: { id: parseInt(userId) },
             },
         },
     });
