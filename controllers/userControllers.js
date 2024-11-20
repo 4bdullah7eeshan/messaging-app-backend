@@ -89,6 +89,19 @@ const updateUser = asyncHandler(async (req, res) => {
     // Create different controllers for each entity update?
     // Password changes? Username and email changes?
     // If username/email changes, then need to ensure uniqueness too
+    const { id } = req.params;
+    const { avatarUrl, bio, displayName } = req.body;
+
+    const updatedUser = await prisma.user.update({
+        where: { id: Number(id) },
+        data: {
+            avatarUrl,
+            bio,
+            displayName,
+        },
+    });
+
+    res.status(200).json({ message: "User updated successfully", updatedUser });
 
 });
 
