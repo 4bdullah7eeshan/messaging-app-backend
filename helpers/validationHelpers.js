@@ -25,3 +25,10 @@ const isUnique = (fieldName, model, dbField, customMessage) =>
         .custom((value) => recordExists(model, dbField, value))
         .withMessage(customMessage || `${fieldName} is already in use`);
 
+module.exports = {
+    notEmpty,
+    hasLength,
+    isValidEmail,
+    isUnique,
+}
+
