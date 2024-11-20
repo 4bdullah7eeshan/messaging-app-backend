@@ -6,3 +6,9 @@ const notEmpty = (fieldName, customMessage) =>
         .notEmpty()
         .withMessage(customMessage || `${fieldName} cannot be empty`);
 
+
+const hasLength = (fieldName, min, max, customMessage) =>
+    body(fieldName)
+        .isLength({ min, max })
+        .withMessage(customMessage || `${fieldName} must be between ${min} and ${max} characters`);
+
