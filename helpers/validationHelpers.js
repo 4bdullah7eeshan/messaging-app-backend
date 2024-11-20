@@ -35,6 +35,11 @@ const isIntegerValue = (fieldName, customMessage) =>
         .isInt()
         .withMessage(customMessage || `${fieldName} must be an integer`)
         .toInt();
+
+const isValidUrl = (fieldName, customMessage) =>
+    body(fieldName)
+        .isURL()
+        .withMessage(customMessage || `${fieldName} must ba a valid URL`);
                 
 
 module.exports = {
@@ -44,5 +49,6 @@ module.exports = {
     isUnique,
     matchesField,
     isIntegerValue,
+    isValidUrl,
 }
 
