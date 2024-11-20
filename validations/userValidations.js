@@ -11,7 +11,6 @@ const {
 
 } = require("./validationHelpers");
 const handleValidationErrors = require("../middlewares/handleValidationErrors");
-const { isIntegerValue } = require("../helpers/validationHelpers");
 
 const validateCreateUser = [
     notEmpty("username"),
