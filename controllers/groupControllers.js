@@ -82,6 +82,11 @@ const deleteGroup = asyncHandler(async (req, res) => {
 });
 
 const getAllUsersGroups = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+
+    const groups = await prisma.user.findUnique({ where: { id: userId } }).groups();
+
+    res.status(200).json(groups);
 
 });
 
