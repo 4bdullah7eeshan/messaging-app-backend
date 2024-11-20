@@ -137,6 +137,22 @@ const addUserToGroup = asyncHandler(async (req, res) => {
         return;
     }
 
+    const isMember = await prisma.group.findMany({
+        where: {
+            id: parseInt(groupId),
+            members: {
+                some: {
+                    id: userId,
+                },
+            },
+        },
+    });
+
+    if (isMember.length > 0) {
+        res.status(400).json({ message: "User is already a member of this group" });
+        return;
+    }
+
     // Just update the group members
     await prisma.group.update({
         where: { id: parseInt(groupId) },
@@ -160,6 +176,32 @@ const removeUserFromGroup = asyncHandler(async (req, res) => {
 
     if (!group) {
         res.status(404).json({ message: "Group not found" });
+        return;
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { id: parseInt(userId) },
+    });
+
+    // Check if the user being added exists
+    if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+    }
+
+    const isMember = await prisma.group.findMany({
+        where: {
+            id: parseInt(groupId),
+            members: {
+                some: {
+                    id: userId,
+                },
+            },
+        },
+    });
+
+    if (isMember.length === 0) {
+        res.status(400).json({ message: "User is not a member of this group" });
         return;
     }
 
