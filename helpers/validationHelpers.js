@@ -41,7 +41,7 @@ const isIntegerValue = (fieldName, customMessage) =>
 const isValidUrl = (fieldName, customMessage) =>
     body(fieldName)
         .isURL()
-        .withMessage(customMessage || `${fieldName} must ba a valid URL`);
+        .withMessage(customMessage || `${fieldName} must be a valid URL`);
                 
 const isString = (fieldName, customMessage) =>
     body(fieldName)
