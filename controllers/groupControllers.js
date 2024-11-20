@@ -152,6 +152,33 @@ const addUserToGroup = asyncHandler(async (req, res) => {
 });
 
 const removeUserFromGroup = asyncHandler(async (req, res) => {
+    const { groupId, userId } = req.params;
+
+    const group = await prisma.group.findUnique({
+        where: { id: Number(groupId) },
+    });
+
+    if (!group) {
+        res.status(404).json({ message: "Group not found" });
+        return;
+    }
+
+    if (group.adminId !== req.user.id) {
+        res.status(403).json({ message: "Only the admin can remove members" });
+        return;
+    }
+
+    // Just disconnect the user from the group
+    await prisma.group.update({
+        where: { id: Number(groupId) },
+        data: {
+            members: {
+                disconnect: { id: Number(userId) },
+            },
+        },
+    });
+
+    res.status(200).json({ message: "User removed from group successfully" });
 
 });
 
