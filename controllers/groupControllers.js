@@ -51,7 +51,30 @@ const updateGroup = asyncHandler(async (req, res) => {
 
 
 const deleteGroup = asyncHandler(async (req, res) => {
+    const { groupId } = req.params;
+    const userId = req.user.id; // Need this to know who is attempting to delete the group.
 
+    const group = await prisma.group.findUnique({
+        where: { id: Number(groupId) },
+    });
+
+    // Check if the group exists
+    if (!group) {
+        res.status(404).json({ message: "Group not found" });
+        return;
+    }
+
+    // Check if the user is the admin before deleting the group
+    if (group.adminId !== userId) {
+        res.status(403).json({ message: "Only the admin can delete the group" });
+        return;
+    }
+
+    await prisma.group.delete({
+        where: { id: parseInt(groupId) },
+    });
+
+    res.status(200).json({ message: "Group deleted successfully" });
 });
 
 const getAllUsersGroups = asyncHandler(async (req, res) => {
