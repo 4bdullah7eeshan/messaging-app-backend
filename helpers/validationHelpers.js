@@ -1,4 +1,4 @@
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const { recordExists } = require("../helpers/prismaHelpers");
 
 const notEmpty = (fieldName, customMessage) =>
@@ -29,6 +29,12 @@ const matchesField = (fieldName, otherFieldName, customMessage) =>
     body(fieldName)
         .custom((value, { req }) => value === req.body[otherFieldName])
         .withMessage(customMessage || `${fieldName} must match ${otherFieldName}`);
+
+const isIntegerValue = (fieldName, customMessage) =>
+    param(fieldName)
+        .isInt()
+        .withMessage(customMessage || `${fieldName} must be an integer`)
+        .toInt();
                 
 
 module.exports = {
@@ -37,5 +43,6 @@ module.exports = {
     isValidEmail,
     isUnique,
     matchesField,
+    isIntegerValue,
 }
 
