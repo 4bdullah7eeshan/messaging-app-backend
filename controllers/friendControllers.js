@@ -99,8 +99,31 @@ const rejectFriendRequest = asyncHandler(async (req, res) => {
 });
 
 const deleteFriend = asyncHandler(async (req, res) => {
-    
+    const userId = req.user.id;
+    const friendId = parseInt(req.params.friendId);
+
+    const friendship = await prisma.friend.findFirst({
+        where: {
+            OR: [
+                { userId: userId, friendId: friendId },
+                { userId: friendId, friendId: userId },
+            ],
+        },
+    });
+
+    if (!friendship) {
+        return res.status(404).json({ message: "No friendship found." });
+    }
+
+    await prisma.friend.delete({
+        where: {
+            id: friendship.id,
+        },
+    });
+
+    res.status(200).json({ message: "Friendship deleted." });
 });
+
 
 const getAllFriendRequests = asyncHandler(async (req, res) => {
 
