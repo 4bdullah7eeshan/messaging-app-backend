@@ -238,6 +238,22 @@ const exitGroup = asyncHandler(async (req, res) => {
         return;
     }
 
+    const isMember = await prisma.group.findMany({
+        where: {
+            id: parseInt(groupId),
+            members: {
+                some: {
+                    id: userId,
+                },
+            },
+        },
+    });
+
+    if (isMember.length === 0) {
+        res.status(400).json({ message: "You are not a member of this group" });
+        return;
+    }
+
     await prisma.group.update({
         where: { id: parseInt(groupId) },
         data: {
