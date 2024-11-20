@@ -29,12 +29,6 @@ const createUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body; // Chose to login the user based on email, not username
 
-    // Check if both email and password are provided
-    if (!email || !password) {
-        res.status(400);
-        throw new Error("Email and password are required");
-    }
-
     // Find the user in db
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
