@@ -33,9 +33,14 @@ const validateGetUser = [
 
 ]
 
+const validateDeleteUser = [
+    isIntegerValue("id"),
+]
+
 module.exports = {
     validateCreateUser,
     validateLoginUser,
     validateGetUser,
+    validateDeleteUser,
 }
 
