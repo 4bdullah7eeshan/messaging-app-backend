@@ -1,10 +1,14 @@
 const {
+    optionalWrapper,
     notEmpty,
     hasLength,
     isUnique,
     isValidEmail,
     matchesField,
-    iIntegerValue,
+    isIntegerValue,
+    isValidUrl,
+    isString,
+
 } = require("./validationHelpers");
 const handleValidationErrors = require("../middlewares/handleValidationErrors");
 const { isIntegerValue } = require("../helpers/validationHelpers");
@@ -33,6 +37,15 @@ const validateGetUser = [
 
 ]
 
+const validateUpdateUser = [
+    optionalWrapper(isValidUrl("avatarUrl", "Invalid Avatar URL")),
+    optionalWrapper(isString("bio", "Bio must be a string")),
+    optionalWrapper(isString("displayName", "Display name must be a string")),
+    optionalWrapper(hasLength("bio", 0, 200, "Bio must be of maximum 200 characters")),
+    optionalWrapper(hasLength("displayName", 0, 50, "Display Name must of maximum 50 characters")),
+
+]
+
 const validateDeleteUser = [
     isIntegerValue("id"),
 ]
@@ -42,5 +55,6 @@ module.exports = {
     validateLoginUser,
     validateGetUser,
     validateDeleteUser,
+    validateUpdateUser,
 }
 
