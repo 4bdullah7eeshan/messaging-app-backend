@@ -9,7 +9,7 @@ const {
     isValidUrl,
     isString,
 
-} = require("./validationHelpers");
+} = require("../helpers/validationHelpers");
 const handleValidationErrors = require("../middlewares/handleValidationErrors");
 
 const validateCreateUser = [
