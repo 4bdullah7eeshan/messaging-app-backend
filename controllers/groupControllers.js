@@ -226,6 +226,28 @@ const joinGroup = asyncHandler(async (req, res) => {
 });
 
 const exitGroup = asyncHandler(async (req, res) => {
+    const { groupId } = req.params;
+    const userId = req.user.id;
+
+    const group = await prisma.group.findUnique({
+        where: { id: parseInt(groupId) },
+    });
+
+    if (!group) {
+        res.status(404).json({ message: "Group not found" });
+        return;
+    }
+
+    await prisma.group.update({
+        where: { id: parseInt(groupId) },
+        data: {
+            members: {
+                disconnect: { id: userId },
+            },
+        },
+    });
+
+    res.status(200).json({ message: "Successfully exited the group" });
 
 });
 
