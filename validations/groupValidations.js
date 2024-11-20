@@ -17,7 +17,12 @@ const validateCreateGroup = [
     hasLength("name", 3, 30, "Group name must be between 3 and 30 characters"),
 ];
 
+const validateGetGroup = [
+    isIntegerValue("id"),
+]
+
 module.exports = {
     validateCreateGroup,
+    validateGetGroup,
 
 }
