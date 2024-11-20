@@ -19,7 +19,15 @@ const validateCreateUser = [
     handleValidationErrors,
 ];
 
+const validateLoginUser = [
+    notEmpty("email"),
+    notEmpty("password"),
+    isValidEmail("email"),
+
+];
+
 module.exports = {
     validateCreateUser,
+    validateLoginUser,
 }
 
