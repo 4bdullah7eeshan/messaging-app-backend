@@ -28,7 +28,6 @@ const createUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body; // Chose to login the user based on email, not username
-    console.log("Request Body:", req.body); // Log the request body
 
     // Find the user in db
     const user = await prisma.user.findUnique({ where: { email } });
@@ -50,19 +49,20 @@ const loginUser = asyncHandler(async (req, res) => {
     const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: jwtExpiry });
 
     res.status(200).json({ message: "Login successful", token, user });
+    console.log(req.isAuthenticated())
+
 });
 
 
 const logoutUser = asyncHandler(async (req, res) => {
     // No need to search db, just check authentication. 401 coz auth.
-    console.log(req.isAuthenticated())
-    if (!req.user) {
+    if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "User is not authenticated" });
     }
 
     req.logout((err) => {
         if (err) {
-            return next(err); // Pass the error to the error-handling middleware
+            return res.status(500).json({ message: "Logout failed", error: err });
         }
         res.status(200).json({ message: "User logged out successfully" });
     });

@@ -9,8 +9,8 @@ const sessionConfig = expressSession({
         maxAge: 7 * 24 * 60 * 60 * 1000 // ms
     },
     secret: process.env.SESSION_SECRET,
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     store: new PrismaSessionStore(
         prisma,
         {
