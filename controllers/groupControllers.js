@@ -316,5 +316,13 @@ const exitGroup = asyncHandler(async (req, res) => {
 
 module.exports = {
     createGroup,
-
+    getGroup,
+    updateGroup,
+    deleteGroup,
+    getAllUsersGroups,
+    getAllGroupMembers,
+    addUserToGroup,
+    removeUserFromGroup,
+    joinGroup,
+    exitGroup,
 }

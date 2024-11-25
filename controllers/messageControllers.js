@@ -123,3 +123,11 @@ const deleteMessage = asyncHandler(async (req, res) => {
 
     res.status(200).json({ message: "Message deleted successfully" });
 });
+
+module.exports = {
+    createMessage,
+    getMessage,
+    getMessages,
+    updateMessage,
+    deleteMessage,
+}

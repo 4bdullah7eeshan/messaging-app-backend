@@ -138,3 +138,13 @@ const deleteUser = asyncHandler(async (req, res) => {
 
     res.status(200).json({ message: "User deleted successfully" });
 });
+
+module.exports = {
+    createUser,
+    loginUser,
+    logoutUser,
+    getUser,
+    getAllUsers,
+    updateUser,
+    deleteUser,
+}

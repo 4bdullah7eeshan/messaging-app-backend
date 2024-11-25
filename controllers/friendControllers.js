@@ -142,3 +142,12 @@ const getAllFriendRequests = asyncHandler(async (req, res) => {
 
     res.status(200).json({ incomingRequests, outgoingRequests });
 });
+
+module.exports = {
+    sendFriendRequest,
+    getFriendRequest,
+    acceptFriendRequest,
+    rejectFriendRequest,
+    deleteFriend,
+    getAllFriendRequests,
+}
