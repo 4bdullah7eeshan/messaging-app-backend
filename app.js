@@ -5,6 +5,7 @@ const passport = require("passport");
 
 const prismaSession = require("./config/session");
 require("./config/passport")(passport);
+const authRouter = require("./routes/authRouters");
 
 
 const app = express();
@@ -16,6 +17,9 @@ app.use(prismaSession);
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use("/auth", authRouter);
+
 
 
 const PORT = process.env.PORT || 3000;
