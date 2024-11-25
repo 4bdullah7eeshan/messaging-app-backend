@@ -28,6 +28,7 @@ const createUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body; // Chose to login the user based on email, not username
+    console.log("Request Body:", req.body); // Log the request body
 
     // Find the user in db
     const user = await prisma.user.findUnique({ where: { email } });
@@ -54,12 +55,17 @@ const loginUser = asyncHandler(async (req, res) => {
 
 const logoutUser = asyncHandler(async (req, res) => {
     // No need to search db, just check authentication. 401 coz auth.
+    console.log(req.isAuthenticated())
     if (!req.user) {
         return res.status(401).json({ message: "User is not authenticated" });
     }
 
-    req.logout();
-    res.status(200).json({ message: "User logged out successfully" });
+    req.logout((err) => {
+        if (err) {
+            return next(err); // Pass the error to the error-handling middleware
+        }
+        res.status(200).json({ message: "User logged out successfully" });
+    });
 });
 
 

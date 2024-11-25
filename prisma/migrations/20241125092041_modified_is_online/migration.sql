@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "isOnline" DROP NOT NULL,
+ALTER COLUMN "isOnline" SET DEFAULT false;
