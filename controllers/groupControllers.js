@@ -314,6 +314,23 @@ const exitGroup = asyncHandler(async (req, res) => {
 
 });
 
+const getAllGroups = asyncHandler(async (req, res) => {
+    const groups = await prisma.group.findMany({
+        include: {
+            name: true,
+            avatarUrl: true,
+            description: true,
+            admin: true,
+            members: true,
+        },
+    });
+
+    res.status(200).json(groups);
+});
+
+
+
+
 module.exports = {
     createGroup,
     getGroup,
@@ -325,4 +342,5 @@ module.exports = {
     removeUserFromGroup,
     joinGroup,
     exitGroup,
+    getAllGroups,
 }
