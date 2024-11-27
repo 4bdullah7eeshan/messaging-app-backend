@@ -143,6 +143,35 @@ const getAllFriendRequests = asyncHandler(async (req, res) => {
     res.status(200).json({ incomingRequests, outgoingRequests });
 });
 
+const getAllFriends = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+
+    // Fetch all accepted friendships where the user is either the `userId` or `friendId`.
+    const friends = await prisma.friend.findMany({
+        where: {
+            OR: [
+                { userId: userId },
+                { friendId: userId },
+            ],
+        },
+        include: {
+            user: true, // Include user details for friends where userId is the friend.
+            friend: true, // Include friend details for friends where friendId is the friend.
+        },
+    });
+
+    // Transform the results to get a consistent list of friends (excluding self-references).
+    const friendList = friends.map((friendship) => {
+        if (friendship.userId === userId) {
+            return friendship.friend; // The other person is the friend.
+        }
+        return friendship.user; // The other person is the user.
+    });
+
+    res.status(200).json(friendList);
+});
+
+
 module.exports = {
     sendFriendRequest,
     getFriendRequest,
@@ -150,4 +179,5 @@ module.exports = {
     rejectFriendRequest,
     deleteFriend,
     getAllFriendRequests,
+    getAllFriends,
 }
