@@ -1,26 +1,41 @@
 const asyncHandler = require("express-async-handler");
 const { PrismaClient } = require("@prisma/client");
 
+const cloudinary = require("../config/cloudinary");
+
 const prisma = new PrismaClient();
 
 const createGroup = asyncHandler(async (req, res) => {
-    const { name } = req.body;
-    const userId = req.user.id;  // Need this to make the user who created the group, an admin and first member
+    const { name, description } = req.body;
+    const userId = req.user.id;
+
+    let avatarUrl = null;
+    if (req.file) {
+        // If a file is uploaded, upload to Cloudinary
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+            folder: "groups",
+            resource_type: "image",
+        });
+        avatarUrl = uploadResult.secure_url;
+    }
 
     const group = await prisma.group.create({
         data: {
             name,
-            adminId: userId,  // Set the creator as the admin
+            description,
+            avatarUrl,
+            adminId: userId,
             members: {
-                connect: { id: userId },  // Add the creator as the first member
+                connect: { id: userId },
             },
         },
     });
-    // Think if you want to allow user to put all group info like description/DP at the time of creation
 
     res.status(201).json({ message: "Group created successfully", group });
-
 });
+
+
+//
 
 
 const getGroup = asyncHandler(async (req, res) => {
@@ -38,11 +53,20 @@ const getGroup = asyncHandler(async (req, res) => {
 
 const updateGroup = asyncHandler(async (req, res) => {
     const { groupId } = req.params;
-    const { name, avatarUrl, description } = req.body;
+    const { name, description } = req.body;
 
     const group = await prisma.group.findUnique({ where: { id: parseInt(groupId) } });
     if (!group) {
         return res.status(404).json({ message: "Group not found" });
+    }
+
+    let avatarUrl = group.avatarUrl; // Retain current avatar if no new upload
+    if (req.file) {
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+            folder: "groups",
+            resource_type: "image",
+        });
+        avatarUrl = uploadResult.secure_url;
     }
 
     const updatedGroup = await prisma.group.update({
@@ -327,8 +351,6 @@ const getAllGroups = asyncHandler(async (req, res) => {
 
     res.status(200).json(groups);
 });
-
-
 
 
 module.exports = {

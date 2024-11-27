@@ -3,6 +3,9 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const cloudinary = require("../config/cloudinary");
+
+
 const prisma = new PrismaClient();
 const jwtSecret = process.env.JWT_SECRET;
 const jwtExpiry = "1h";
@@ -104,7 +107,15 @@ const updateUser = asyncHandler(async (req, res) => {
     // Password changes? Username and email changes?
     // If username/email changes, then need to ensure uniqueness too
     const { id } = req.params;
-    const { avatarUrl, bio, displayName } = req.body;
+    const { bio, displayName } = req.body;
+    let avatarUrl = null;
+    
+    if (req.file) {
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+            folder: "avatars",
+        });
+        avatarUrl = uploadResult.secure_url;
+    }
 
     // Fetch the user from the db
     const user = await prisma.user.findUnique({ where: { id: parseInt(id) } });
@@ -117,7 +128,7 @@ const updateUser = asyncHandler(async (req, res) => {
     const updatedUser = await prisma.user.update({
         where: { id: parseInt(id) },
         data: {
-            avatarUrl,
+            avatarUrl: avatarUrl || user.avatarUrl,
             bio,
             displayName,
         },

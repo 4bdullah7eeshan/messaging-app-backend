@@ -1,16 +1,27 @@
 const asyncHandler = require("express-async-handler");
 const { PrismaClient } = require("@prisma/client");
 
+const cloudinary = require("../config/cloudinary");
+
+
 const prisma = new PrismaClient();
 
 const createMessage = asyncHandler(async (req, res) => {
     const { content, targetId, isGroup } = req.body;  // Determine if it's a private or group message from frontend
     const userId = req.user.id;
+    let fileUrl = null;
 
-    // Setup message data
+    if (req.file) {
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+            folder: isGroup ? `group_${targetId}` : `user_${userId}`,
+        });
+        fileUrl = uploadResult.secure_url;
+    }
+
     const messageData = {
         content,
         senderId: userId,
+        fileUrl,
     };
 
     if (isGroup) {
