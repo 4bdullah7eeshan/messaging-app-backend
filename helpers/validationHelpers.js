@@ -1,5 +1,5 @@
 const { body, param } = require("express-validator");
-const { recordExists } = require("../helpers/prismaHelpers");
+const recordExists = require("../helpers/prismaHelpers");
 
 const optionalWrapper = (rule) => rule.optional();
 
@@ -21,11 +21,17 @@ const isValidEmail = (fieldName, customMessage) =>
         .isEmail()
         .withMessage(customMessage || `${fieldName} is not a valid email.`);
 
-
-const isUnique = (fieldName, model, dbField, customMessage) => 
+const isUnique = (fieldName, model, dbField, customMessage) =>
     body(fieldName)
-        .custom((value) => recordExists(model, dbField, value))
-        .withMessage(customMessage || `${fieldName} is already in use`);
+        .custom(async (value) => {
+            const exists = await recordExists(model, dbField, value);
+            if (exists) {
+                return Promise.reject(customMessage || `${fieldName} is already in use`);
+            }
+            return true;  // If the record doesn't exist, validation passes
+        });
+        
+        
 
 const matchesField = (fieldName, otherFieldName, customMessage) =>
     body(fieldName)
