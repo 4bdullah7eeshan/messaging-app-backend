@@ -61,7 +61,6 @@ const loginUser = asyncHandler(async (req, res) => {
         return res.status(500).json({ message: "Error generating token", error });
     }
     
-    res.status(200).json({ message: "Login successful", token, user });
 
 });
 
