@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const passport = require("passport");
+const { createServer } = require('node:http');
+
 
 const prismaSession = require("./config/session");
 require("./config/passport")(passport);
@@ -12,6 +14,8 @@ const groupRouter = require("./routes/groupRoutes");
 const messageRouter = require("./routes/messageRoutes");
 
 const app = express();
+const server = createServer(app);
+
 
 app.use(cors());
 app.use(express.json());
@@ -43,6 +47,6 @@ app.use((err, req, res, next) => {
 
 // Start Server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
+server.listen(PORT, () =>
     console.log(`Messaging App running on port ${PORT}!`)
 );
