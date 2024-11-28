@@ -13,6 +13,11 @@ const jwtExpiry = "1h";
 const createUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body; // displayName entity in the User model was optional. Not needed to create an account.
 
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+        return res.status(400).json({ message: "Email is already in use" });
+    }
+
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -49,10 +54,14 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     // Generate a JWT
-    const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: jwtExpiry });
-
+    try {
+        const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: jwtExpiry });
+        res.status(200).json({ message: "Login successful", token, user });
+    } catch (error) {
+        return res.status(500).json({ message: "Error generating token", error });
+    }
+    
     res.status(200).json({ message: "Login successful", token, user });
-    console.log(req.isAuthenticated())
 
 });
 

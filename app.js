@@ -13,18 +13,14 @@ const messageRouter = require("./routes/messageRoutes");
 
 const app = express();
 
-// Middleware
-const corsOptions = {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
-    credentials: true,
-};
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 
 // Session and Passport
+
 app.use(prismaSession);
 app.use(passport.initialize());
-app.use(passport.session());
+//app.use(passport.session());
 
 // Routes
 app.use("/auth", authRouter);

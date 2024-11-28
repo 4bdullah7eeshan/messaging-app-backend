@@ -3,10 +3,9 @@ const authenticateJwt = require("../middlewares/authenticateJWT");
 const friendControllers = require("../controllers/friendControllers");
 
 const friendRouter = Router();
-const isAuthenticated = authenticateJwt();
 
 friendRouter.get("/", friendControllers.getAllFriends);
-friendRouter.delete("/:id", isAuthenticated, friendControllers.deleteFriend);
+friendRouter.delete("/:id", authenticateJwt, friendControllers.deleteFriend);
 
 
 module.exports = friendRouter;

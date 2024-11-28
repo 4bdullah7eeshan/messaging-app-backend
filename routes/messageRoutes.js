@@ -3,22 +3,21 @@ const authenticateJwt = require("../middlewares/authenticateJWT");
 const messageControllers = require("../controllers/messageControllers");
 
 const messageRouter = Router();
-const isAuthenticated = authenticateJwt();
 
 // Create a message (private or group)
-messageRouter.post("/", isAuthenticated, messageControllers.createMessage);
+messageRouter.post("/", authenticateJwt, messageControllers.createMessage);
 
 // Get paginated messages for a private chat or group
 // Use query parameter `isGroup` for boolean values
-messageRouter.get("/:targetId", isAuthenticated, messageControllers.getMessages);
+messageRouter.get("/:targetId", authenticateJwt, messageControllers.getMessages);
 
 // Get a single message by ID
-messageRouter.get("/:messageId", isAuthenticated, messageControllers.getMessage);
+messageRouter.get("/:messageId", authenticateJwt, messageControllers.getMessage);
 
 // Update a message by ID
-messageRouter.put("/:messageId", isAuthenticated, messageControllers.updateMessage);
+messageRouter.put("/:messageId", authenticateJwt, messageControllers.updateMessage);
 
 // Delete a message by ID
-messageRouter.delete("/:messageId", isAuthenticated, messageControllers.deleteMessage);
+messageRouter.delete("/:messageId", authenticateJwt, messageControllers.deleteMessage);
 
 module.exports = messageRouter;

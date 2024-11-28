@@ -5,12 +5,11 @@ const userControllers = require("../controllers/userControllers");
 
 
 const userRouter = Router();
-const isAuthenticated = authenticateJwt();
 
 userRouter.get("/", userControllers.getAllUsers);
 userRouter.get("/:id", userControllers.getUser);
-userRouter.patch("/:id", isAuthenticated,userControllers.updateUser);
-userRouter.delete("/:id", isAuthenticated,userControllers.deleteUser);
+userRouter.patch("/:id", authenticateJwt, userControllers.updateUser);
+userRouter.delete("/:id", authenticateJwt, userControllers.deleteUser);
 
 
 module.exports = userRouter;
