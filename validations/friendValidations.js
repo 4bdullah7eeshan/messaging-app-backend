@@ -6,7 +6,6 @@ const handleValidationErrors = require("../middlewares/handleValidationErrors");
 
 // Validate Sending Friend Request
 const validateSendFriendRequest = [
-    isIntegerValue("senderId", "Sender ID must be a valid integer"),
     isIntegerValue("receiverId", "Receiver ID must be a valid integer"),
     handleValidationErrors,
 ];

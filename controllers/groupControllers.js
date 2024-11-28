@@ -350,7 +350,7 @@ const exitGroup = asyncHandler(async (req, res) => {
 
 const getAllGroups = asyncHandler(async (req, res) => {
     const groups = await prisma.group.findMany({
-        include: {
+        select: {
             name: true,
             avatarUrl: true,
             description: true,

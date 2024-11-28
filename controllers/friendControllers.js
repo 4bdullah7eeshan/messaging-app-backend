@@ -13,6 +13,13 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "You cannot send a friend request to yourself." });
     }
 
+    const senderExists = await prisma.user.findUnique({ where: { id: senderId } });
+    const receiverExists = await prisma.user.findUnique({ where: { id: receiverId } });
+
+    if (!senderExists || !receiverExists) {
+        return res.status(400).json({ message: "One or both users do not exist." });
+    }
+
     const existingRequest = await prisma.friend.findFirst({
         where: {
             OR: [
@@ -38,7 +45,7 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
 
     io.to(receiverId).emit("friend-request-received", {
         senderId: req.user.id,
-        request,
+        request: friendRequest,
     });
 
     res.status(201).json({ message: "Friend request sent", friendRequest });

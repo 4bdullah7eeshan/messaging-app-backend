@@ -36,7 +36,7 @@ app.use(express.json());
 
 app.use(prismaSession);
 app.use(passport.initialize());
-//app.use(passport.session());
+app.use(passport.session());
 
 app.set("io", io);
 
