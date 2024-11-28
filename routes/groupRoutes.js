@@ -1,11 +1,12 @@
 const { Router } = require("express");
 const authenticateJwt = require("../middlewares/authenticateJWT");
 const groupControllers = require("../controllers/groupControllers");
+const groupValidations = require("../validations/groupValidations");
 
 const groupRouter = Router();
 
 groupRouter.get("/", groupControllers.getAllGroups);
-groupRouter.get("/:id", groupControllers.getGroup);
+groupRouter.get("/:id", groupValidations.validateGetGroup, groupControllers.getGroup);
 groupRouter.patch("/:id", authenticateJwt, groupControllers.updateGroup);
 groupRouter.delete("/:id", authenticateJwt, groupControllers.deleteGroup);
 groupRouter.get("/:id/members", authenticateJwt, groupControllers.getAllGroupMembers);
