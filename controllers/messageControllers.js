@@ -10,6 +10,8 @@ const createMessage = asyncHandler(async (req, res) => {
     const { content, targetId, isGroup } = req.body;  // Determine if it's a private or group message from frontend
     const userId = req.user.id;
     let fileUrl = null;
+    const io = req.app.get("io");
+
 
     if (req.file) {
         const uploadResult = await cloudinary.uploader.upload(req.file.path, {
@@ -31,6 +33,12 @@ const createMessage = asyncHandler(async (req, res) => {
     }
 
     const message = await prisma.message.create({ data: messageData });
+
+    if (isGroup) {
+        io.to(targetId).emit("group-message", { message });
+    } else {
+        io.to(targetId).emit("private-message", { message });
+    }
 
     res.status(201).json({ message: "Message created successfully", message });
 });

@@ -81,6 +81,8 @@ const updateGroup = asyncHandler(async (req, res) => {
 const deleteGroup = asyncHandler(async (req, res) => {
     const { groupId } = req.params;
     const userId = req.user.id; // Need this to know who is attempting to delete the group.
+    const io = req.app.get("io");
+
 
     const group = await prisma.group.findUnique({
         where: { id: parseInt(groupId) },
@@ -101,6 +103,9 @@ const deleteGroup = asyncHandler(async (req, res) => {
     await prisma.group.delete({
         where: { id: parseInt(groupId) },
     });
+
+    io.to(groupId).emit("group-deleted", { groupId });
+
 
     res.status(200).json({ message: "Group deleted successfully" });
 });
@@ -251,6 +256,8 @@ const removeUserFromGroup = asyncHandler(async (req, res) => {
 const joinGroup = asyncHandler(async (req, res) => {
     const { groupId } = req.params;
     const userId = req.user.id;
+    const io = req.app.get("io");
+
 
     const group = await prisma.group.findUnique({
         where: { id: parseInt(groupId) },
@@ -286,6 +293,9 @@ const joinGroup = asyncHandler(async (req, res) => {
             },
         },
     });
+
+    io.to(groupId).emit("group-member-joined", { userId: req.user.id });
+
 
     res.status(200).json({ message: "Successfully joined the group" });
 

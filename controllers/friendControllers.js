@@ -6,6 +6,8 @@ const prisma = new PrismaClient();
 const sendFriendRequest = asyncHandler(async (req, res) => {
     const senderId = req.user.id;
     const receiverId = parseInt(req.params.receiverId);
+    const io = req.app.get("io");
+
 
     if (senderId === receiverId) {
         return res.status(400).json({ message: "You cannot send a friend request to yourself." });
@@ -34,6 +36,11 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
         },
     });
 
+    io.to(receiverId).emit("friend-request-received", {
+        senderId: req.user.id,
+        request,
+    });
+
     res.status(201).json({ message: "Friend request sent", friendRequest });
 });
 
@@ -56,6 +63,8 @@ const getFriendRequest = asyncHandler(async (req, res) => {
 const acceptFriendRequest = asyncHandler(async (req, res) => {
     const requestId = parseInt(req.params.requestId);
     const userId = req.user.id;
+    const io = req.app.get("io");
+
 
     const friendRequest = await prisma.friend.findUnique({
         where: { id: requestId },
@@ -70,6 +79,10 @@ const acceptFriendRequest = asyncHandler(async (req, res) => {
     }
 
     await prisma.friend.update({ where: { id: requestId } });
+
+    io.to(senderId).emit("friend-request-accepted", { receiverId });
+    io.to(receiverId).emit("friendship-created", { senderId });
+
 
     res.status(200).json({ message: "Friend request accepted." });
 });

@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const passport = require("passport");
 const { createServer } = require('node:http');
+const { Server } = require('socket.io');
+
 
 
 const prismaSession = require("./config/session");
@@ -12,9 +14,17 @@ const friendRouter = require("./routes/friendRoutes");
 const friendRequestRouter = require("./routes/friendRequestRoutes");
 const groupRouter = require("./routes/groupRoutes");
 const messageRouter = require("./routes/messageRoutes");
+const { authenticateSocket } = require("./middlewares/authenticateSocket"); // Custom middleware for socket authentication
+
 
 const app = express();
 const server = createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:3000", // Allow frontend origin
+        methods: ["GET", "POST", "PUT", "DELETE"], // Add allowed HTTP methods
+    },
+});
 
 
 app.use(cors());
@@ -22,9 +32,24 @@ app.use(express.json());
 
 // Session and Passport
 
+
+
 app.use(prismaSession);
 app.use(passport.initialize());
 //app.use(passport.session());
+
+app.set("io", io);
+
+io.use(authenticateSocket);
+
+// Handle socket events
+io.on("connection", (socket) => {
+    console.log(`User connected: ${socket.id}`);
+
+    socket.on("disconnect", () => {
+        console.log(`User disconnected: ${socket.id}`);
+    });
+});
 
 // Routes
 app.use("/auth", authRouter);
