@@ -5,6 +5,7 @@ const groupValidations = require("../validations/groupValidations");
 
 const groupRouter = Router();
 
+groupRouter.post("/:id", groupValidations.validateCreateGroup, groupControllers.createGroup);
 groupRouter.get("/", groupControllers.getAllGroups);
 groupRouter.get("/:id", groupValidations.validateGetGroup, groupControllers.getGroup);
 groupRouter.patch("/:id", authenticateJwt, groupControllers.updateGroup);
