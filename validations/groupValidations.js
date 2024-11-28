@@ -20,6 +20,11 @@ const validateCreateGroup = [
     handleValidationErrors,
 ];
 
+const validateGetGroup = [
+    isIntegerValue("id"),
+    handleValidationErrors,
+];
+
 const validateUpdateGroup = [
     optionalWrapper(isString("name", "Group name must be a string")),
     optionalWrapper(hasLength("name", 3, 50, "Group name must be between 3 and 50 characters")),
@@ -33,16 +38,25 @@ const validateDeleteGroup = [
     handleValidationErrors,
 ];
 
-
-const validateGetGroup = [
+const validateAddUserToGroup = [
     isIntegerValue("id"),
+    isIntegerValue("userId", "User ID must be an integer"),
     handleValidationErrors,
-]
+];
+
+const validateRemoveUserFromGroup = [
+    isIntegerValue("id"),
+    isIntegerValue("userId", "User ID must be an integer"),
+    handleValidationErrors,
+];
+
 
 module.exports = {
     validateCreateGroup,
     validateUpdateGroup,
     validateDeleteGroup,
     validateGetGroup,
+    validateAddUserToGroup,
+    validateRemoveUserFromGroup,
 
 }

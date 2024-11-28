@@ -12,8 +12,8 @@ groupRouter.patch("/:id", groupValidations.validateUpdateGroup, authenticateJwt,
 groupRouter.delete("/:id", groupValidations.validateDeleteGroup, authenticateJwt, groupControllers.deleteGroup);
 groupRouter.get("/:id/members", authenticateJwt, groupControllers.getAllGroupMembers);
 groupRouter.get("/:id/join", authenticateJwt, groupControllers.joinGroup);
-groupRouter.patch(":id/members/add", authenticateJwt, groupControllers.addUserToGroup);
-groupRouter.patch(":/id/members/remove", authenticateJwt, groupControllers.removeUserFromGroup);
+groupRouter.patch(":id/members/add", groupValidations.validateAddUserToGroup, authenticateJwt, groupControllers.addUserToGroup);
+groupRouter.patch(":/id/members/remove", groupValidations.validateRemoveUserFromGroup, authenticateJwt, groupControllers.removeUserFromGroup);
 
 
 module.exports = groupRouter;
