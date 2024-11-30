@@ -68,7 +68,7 @@ const loginUser = asyncHandler(async (req, res) => {
     } catch (error) {
         return res.status(500).json({ message: "Error generating token", error });
     }
-    
+
 
 });
 
@@ -107,26 +107,26 @@ const getLoggedInUser = asyncHandler(async (req, res) => {
     console.log(req);
     console.log(req.user);
     console.log(userId);
-    
-    const user = await prisma.user.findUnique({ 
-      where: { id: parseInt(userId) }, 
-      select: { // Select only the fields you want to expose
-        id: true,
-        username: true,
-        email: true,
-        avatarUrl: true,
-        bio: true,
-      }
+
+    const user = await prisma.user.findUnique({
+        where: { id: parseInt(userId) },
+        select: { // Select only the fields you want to expose
+            id: true,
+            username: true,
+            email: true,
+            avatarUrl: true,
+            bio: true,
+        }
     });
-  
+
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: "User not found" });
     }
-  
+
     res.status(200).json(user);
-  });
-  
-  
+});
+
+
 
 
 const getAllUsers = asyncHandler(async (req, res) => {
@@ -142,51 +142,111 @@ const getAllUsers = asyncHandler(async (req, res) => {
 });
 
 
-const updateUser = asyncHandler(async (req, res) => {
-    // Think about this!
-    // What to update? All entities such as DP/bio/display name/ or just one? How to manage both cases?
-    // Create different controllers for each entity update?
-    // Password changes? Username and email changes?
-    // If username/email changes, then need to ensure uniqueness too
-    const { id } = req.params;
-    const { bio, displayName } = req.body;  // Parse the updated data
-    let avatarUrl = null;
-    
-    if (req.file) {
-        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-            folder: "uploads", resource_type: "auto"
-        });
-        avatarUrl = uploadResult.secure_url;
-    }
+// const updateUser = asyncHandler(async (req, res) => {
+//     // Think about this!
+//     // What to update? All entities such as DP/bio/display name/ or just one? How to manage both cases?
+//     // Create different controllers for each entity update?
+//     // Password changes? Username and email changes?
+//     // If username/email changes, then need to ensure uniqueness too
+//     const { id } = req.params;
+//     const { bio, displayName } = req.body;  // Parse the updated data
+//     let avatarUrl = null;
 
-    // Fetch the user from the db
+//     if (req.file) {
+//         const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+//             folder: "uploads", resource_type: "auto"
+//         });
+//         avatarUrl = uploadResult.secure_url;
+//     }
+
+//     // Fetch the user from the db
+//     const user = await prisma.user.findUnique({ where: { id: parseInt(id) } });
+
+//     // If the user does not exist, throw an error
+//     if (!user) {
+//         return res.status(404).json({ message: "User not found" });
+//     }
+
+//     console.log(user);  // Add this line to check if the user is found
+
+//     console.log(bio);
+
+//     console.log(displayName);
+//     const updatedUser = await prisma.user.update({
+//         where: { id: parseInt(id) },
+//         data: {
+//             avatarUrl: avatarUrl || user.avatarUrl,
+//             bio: bio || user.bio,
+//             displayName: displayName || user.displayName,
+//         },
+//     });
+
+//     console.log(user);  // Add this line to check if the user is found
+
+
+//     res.status(200).json({ message: "User updated successfully", updatedUser });
+
+// });
+
+const updateTextualData = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { bio, displayName } = req.body;
+
     const user = await prisma.user.findUnique({ where: { id: parseInt(id) } });
 
-    // If the user does not exist, throw an error
     if (!user) {
         return res.status(404).json({ message: "User not found" });
     }
 
-    console.log(user);  // Add this line to check if the user is found
 
-    console.log(bio);
-    
-    console.log(displayName);
     const updatedUser = await prisma.user.update({
         where: { id: parseInt(id) },
         data: {
-            avatarUrl: avatarUrl || user.avatarUrl,
             bio: bio || user.bio,
             displayName: displayName || user.displayName,
         },
     });
 
-    console.log(user);  // Add this line to check if the user is found
 
-
-    res.status(200).json({ message: "User updated successfully", updatedUser });
-
+    res.status(200).json({ message: "User textual data updated successfully", updatedUser });
 });
+
+const updateAvatar = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const uploadResult = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+            { folder: "uploads", resource_type: "auto" },
+            (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+            }
+        ).end(req.file.buffer);
+    });
+
+    const avatarUrl = uploadResult.secure_url;
+
+    const user = await prisma.user.findUnique({ where: { id: parseInt(id) } });
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    const updatedUser = await prisma.user.update({
+        where: { id: parseInt(id) },
+        data: {
+            avatarUrl: avatarUrl,
+        },
+    });
+
+
+    res.status(200).json({ message: "User avatar updated successfully", updatedUser });
+});
+
 
 
 const deleteUser = asyncHandler(async (req, res) => {
@@ -212,7 +272,8 @@ module.exports = {
     logoutUser,
     getUser,
     getAllUsers,
-    updateUser,
+    updateTextualData,
+    updateAvatar,
     deleteUser,
     getLoggedInUser,
     upload,
