@@ -33,8 +33,8 @@ module.exports = (passport) => {
             },
             async (jwtPayload, done) => {
                 try {
-                    const user = await prisma.user.findUnique({ where: { id: jwtPayload.userId } });
-                    if (user) return done(null, user);
+                    const user = await prisma.user.findUnique({ where: { id: parseInt(jwtPayload.userId) } });
+                    if (user) return done(null, { userId: user.id });
                     else return done(null, false);
                 } catch (error) {
                     return done(error, false);

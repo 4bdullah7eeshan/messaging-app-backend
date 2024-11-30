@@ -2,8 +2,16 @@ const asyncHandler = require("express-async-handler");
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+
+
 
 const cloudinary = require("../config/cloudinary");
+
+const storage = multer.memoryStorage();
+
+
+const upload = multer({ storage: storage });
 
 
 const prisma = new PrismaClient();
@@ -94,6 +102,32 @@ const getUser = asyncHandler(async (req, res) => {
     res.status(200).json(user);
 });
 
+const getLoggedInUser = asyncHandler(async (req, res) => {
+    const userId = req.user.userId; // Extract userId from req.user
+    console.log(req);
+    console.log(req.user);
+    console.log(userId);
+    
+    const user = await prisma.user.findUnique({ 
+      where: { id: parseInt(userId) }, 
+      select: { // Select only the fields you want to expose
+        id: true,
+        username: true,
+        email: true,
+        avatarUrl: true,
+        bio: true,
+      }
+    });
+  
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+  
+    res.status(200).json(user);
+  });
+  
+  
+
 
 const getAllUsers = asyncHandler(async (req, res) => {
     const users = await prisma.user.findMany({
@@ -115,12 +149,12 @@ const updateUser = asyncHandler(async (req, res) => {
     // Password changes? Username and email changes?
     // If username/email changes, then need to ensure uniqueness too
     const { id } = req.params;
-    const { bio, displayName } = req.body;
+    const { bio, displayName } = req.body;  // Parse the updated data
     let avatarUrl = null;
     
     if (req.file) {
         const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-            folder: "avatars",
+            folder: "uploads", resource_type: "auto"
         });
         avatarUrl = uploadResult.secure_url;
     }
@@ -133,14 +167,22 @@ const updateUser = asyncHandler(async (req, res) => {
         return res.status(404).json({ message: "User not found" });
     }
 
+    console.log(user);  // Add this line to check if the user is found
+
+    console.log(bio);
+    
+    console.log(displayName);
     const updatedUser = await prisma.user.update({
         where: { id: parseInt(id) },
         data: {
             avatarUrl: avatarUrl || user.avatarUrl,
-            bio,
-            displayName,
+            bio: bio || user.bio,
+            displayName: displayName || user.displayName,
         },
     });
+
+    console.log(user);  // Add this line to check if the user is found
+
 
     res.status(200).json({ message: "User updated successfully", updatedUser });
 
@@ -172,4 +214,6 @@ module.exports = {
     getAllUsers,
     updateUser,
     deleteUser,
+    getLoggedInUser,
+    upload,
 }
