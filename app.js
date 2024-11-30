@@ -59,16 +59,16 @@ app.use("/friends", friendRouter);
 app.use("/friend_requests", friendRequestRouter);
 app.use("/messages", messageRouter);
 
-// 404 Handler
-app.use((req, res, next) => {
-    res.status(404).json({ message: "Route not found" });
-});
+// // 404 Handler
+// app.use((req, res, next) => {
+//     res.status(404).json({ message: "Route not found" });
+// });
 
-// Global Error Handler
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(err.status || 500).json({ message: err.message || "Internal Server Error" });
-});
+// // Global Error Handler
+// app.use((err, req, res, next) => {
+//     console.error(err.stack);
+//     res.status(err.status || 500).json({ message: err.message || "Internal Server Error" });
+// });
 
 // Start Server
 const PORT = process.env.PORT || 3000;
