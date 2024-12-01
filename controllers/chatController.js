@@ -150,6 +150,32 @@ const getChatMessages = asyncHandler(async (req, res) => {
 
 });
 
+const searchChats = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    const { query } = req.query;
+
+
+    const chats = await prisma.chat.findMany({
+        where: {
+            participants: {
+                some: {
+                    OR: [
+                        { username: { contains: query, mode: 'insensitive' } },
+                        { displayName: { contains: query, mode: 'insensitive' } },
+                    ],
+                },
+            },
+        },
+        include: {
+            participants: true,
+        },
+    });
+
+    return res.status(200).json({ message: 'Chats fetched successfully', chats });
+
+});
+
+
 
 
 
