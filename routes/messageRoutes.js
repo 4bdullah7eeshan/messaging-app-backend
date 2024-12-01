@@ -7,14 +7,14 @@ const messageValidations = require("../validations/messageValidations");
 const messageRouter = Router();
 
 // Create a message (private or group)
-messageRouter.post("/", messageValidations.validateCreateMessage, authenticateJwt, messageControllers.createMessage);
+messageRouter.post("/new", messageValidations.validateCreateMessage, authenticateJwt, messageControllers.createMessage);
 
 // Get paginated messages for a private chat or group
 // Use query parameter `isGroup` for boolean values
-messageRouter.get("/:targetId", authenticateJwt, messageControllers.getMessages);
+messageRouter.get("/:receiverId", authenticateJwt, messageControllers.getMessages);
 
 // Get a single message by ID
-messageRouter.get("/:messageId", messageValidations.validateGetMessage, authenticateJwt, messageControllers.getMessage);
+//messageRouter.get("/:messageId", messageValidations.validateGetMessage, authenticateJwt, messageControllers.getMessage);
 
 // Update a message by ID
 messageRouter.put("/:messageId", authenticateJwt, messageControllers.updateMessage);
@@ -22,5 +22,5 @@ messageRouter.put("/:messageId", authenticateJwt, messageControllers.updateMessa
 // Delete a message by ID
 messageRouter.delete("/:messageId", messageValidations.validateDeleteMessage, authenticateJwt, messageControllers.deleteMessage);
 
-messageRouter.get("/c", authenticateJwt, messageControllers.getDistinctChats);
+messageRouter.get("/c/u", authenticateJwt, messageControllers.getDistinctChats);
 module.exports = messageRouter;

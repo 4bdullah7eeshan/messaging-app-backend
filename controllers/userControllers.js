@@ -134,7 +134,14 @@ const getAllUsers = asyncHandler(async (req, res) => {
         select: {
             id: true,
             username: true,
-            // Todo: Get more properties based on requirement.
+            displayName: true,
+            email: true,
+            avatarUrl: true,
+            bio: true,
+            isOnline: true,
+            lastActive: true,
+            createdAt: true,
+            
         },
     });
 
