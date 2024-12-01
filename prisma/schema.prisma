@@ -22,7 +22,7 @@ model User {
   password          String
   avatarUrl         String?   // (Optional) Profile picture/DP. It will be a cloudinary URL. Handle default place holder in frontend.
   bio               String?   // (Optional)
-  isOnline          Boolean?  @default(false)
+  isOnline          Boolean   @default(false)
   lastActive        DateTime  @updatedAt
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt  // Comes into action whenever the User updates any profile info.
@@ -33,16 +33,19 @@ model User {
   friends           Friend[]  @relation("Friends")
   groups            Group[]   @relation("Members")
   adminOfGroups     Group[]   @relation("GroupAdmin")
+  chats             Chat[]    @relation("ChatParticipants")
+
 }
 
 // There are two stages in the process of becoming friends. A request must be sent and must be accepted. 
 
 model Friend {
-  id       Int  @id @default(autoincrement())
+  id       Int               @id @default(autoincrement())
   userId   Int
   friendId Int
-  user     User @relation("SentFriendship", fields: [userId], references: [id])
-  friend   User @relation("Friends", fields: [friendId], references: [id])
+  status   FriendshipStatus  @default(PENDING)
+  user     User              @relation("SentFriendship", fields: [userId], references: [id])
+  friend   User              @relation("Friends", fields: [friendId], references: [id])
 
   @@unique([userId, friendId]) // To prevent duplicate friendships
 }
@@ -59,24 +62,57 @@ model Group {
   admin       User      @relation("GroupAdmin", fields: [adminId], references: [id]) // Relation to admin user
 
   members     User[]   @relation("Members")
-  messages    Message[]
+  private     Boolean  @default(false)
+  chat        Chat?     @relation("GroupChat") // Relation to a Chat
+
+  @@index([adminId]) // Index for admin queries
+
+
 }
 
 // Create a separate model for messages in groups if the following does not work. 
 model Message {
   id          Int       @id @default(autoincrement())
+  chatId      Int 
   senderId    Int       
   receiverId  Int?      // (Optional) Because a message could be sent in a group as well.       
-  groupId     Int?      // (Optional) Same as above
   timeStamp   DateTime  @default(now())
   content     String?   // (Optional)
   imageUrl    String?   // (Optional) For sending images. It will be a cloudinary URL.
   
   sender      User     @relation("Sender", fields: [senderId], references: [id])
   receiver    User?    @relation("Receiver", fields: [receiverId], references: [id])
-  group       Group?   @relation(fields: [groupId], references: [id])
+  chat        Chat      @relation(fields: [chatId], references: [id])
+
 
 }
+
+model Chat {
+  id          Int       @id @default(autoincrement())
+  type        ChatType  @default(PRIVATE)
+  groupId     Int?      @unique
+  group       Group?    @relation("GroupChat", fields: [groupId], references: [id])
+  participants User[]   @relation("ChatParticipants") // Users in the chat
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  messages    Message[] // Messages related to this chat
+
+  @@index([groupId]) // Index for faster queries
+
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+
+enum ChatType {
+  PRIVATE
+  GROUP
+}
+
 // Note:
 // Both content and imageUrl being optional does not mean sending empty messages.
 // When a user wants to send a message, we can not oblige it to send a test/image.
