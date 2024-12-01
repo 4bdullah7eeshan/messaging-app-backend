@@ -85,6 +85,26 @@ const getChatById = asyncHandler(async (req, res) => {
 
 });
 
+const updateChat = asyncHandler(async (req, res) => {
+    const { chatId } = req.params;
+    const { groupId, participantIds } = req.body;
+
+
+    const chat = await prisma.chat.update({
+        where: { id: parseInt(chatId) },
+        data: {
+            groupId,
+            participants: {
+                connect: participantIds?.map((id) => ({ id })),
+            },
+        }
+    });
+
+    return res.status(200).json({ message: 'Chat updated successfully', chat });
+
+});
+
+
 
 
 
