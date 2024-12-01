@@ -116,6 +116,25 @@ const deleteChat = asyncHandler(async (req, res) => {
 
 });
 
+const addMessageToChat = asyncHandler(async (req, res) => {
+    const { chatId } = req.params;
+    const { senderId, content, imageUrl } = req.body;
+
+
+    const message = await prisma.message.create({
+        data: {
+            chatId: parseInt(chatId),
+            senderId,
+            content,
+            imageUrl,
+        },
+    });
+
+    return res.status(201).json({ message: 'Message added successfully', message });
+
+});
+
+
 
 
 
