@@ -143,10 +143,60 @@ const deleteMessage = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "Message deleted successfully" });
 });
 
+const getDistinctChats = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+
+    // Get distinct private chats
+    const privateChats = await prisma.message.findMany({
+        where: {
+            OR: [
+                { senderId: userId },
+                { receiverId: userId }
+            ],
+        },
+        distinct: ['senderId', 'receiverId'], // Ensure each chat between two users is distinct
+        include: {
+            sender: true,
+            receiver: true,
+        },
+    });
+
+    // Get distinct group chats (where user is a member)
+    const groupChats = await prisma.message.findMany({
+        where: {
+            OR: [
+                { group: { members: { some: { id: userId } } } }, // Groups where the user is a member
+            ],
+        },
+        distinct: ['groupId'], // Ensure each group chat is distinct
+        include: {
+            group: true,
+        },
+    });
+
+    // Combine both private and group chats
+    const allChats = [
+        ...privateChats.map(chat => ({
+            chatType: 'private',
+            participants: chat.receiverId === userId ? chat.sender : chat.receiver,
+            chatId: chat.id,
+        })),
+        ...groupChats.map(chat => ({
+            chatType: 'group',
+            participants: chat.group.name,  // Or any other group-related field
+            chatId: chat.groupId,
+        })),
+    ];
+
+    res.status(200).json(allChats);
+});
+
+
 module.exports = {
     createMessage,
     getMessage,
     getMessages,
     updateMessage,
     deleteMessage,
+    getDistinctChats,
 }

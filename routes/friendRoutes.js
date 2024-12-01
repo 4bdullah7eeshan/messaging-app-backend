@@ -6,7 +6,7 @@ const friendValidations = require("../validations/friendValidations");
 
 const friendRouter = Router();
 
-friendRouter.get("/", friendControllers.getAllFriends);
+friendRouter.get("/", authenticateJwt, friendControllers.getAllFriends);
 friendRouter.delete("/:id", friendValidations.validateDeleteFriend, authenticateJwt, friendControllers.deleteFriend);
 
 

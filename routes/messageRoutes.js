@@ -22,4 +22,5 @@ messageRouter.put("/:messageId", authenticateJwt, messageControllers.updateMessa
 // Delete a message by ID
 messageRouter.delete("/:messageId", messageValidations.validateDeleteMessage, authenticateJwt, messageControllers.deleteMessage);
 
+messageRouter.get("/c", authenticateJwt, messageControllers.getDistinctChats);
 module.exports = messageRouter;
