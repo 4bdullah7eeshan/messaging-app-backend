@@ -176,7 +176,16 @@ const searchChats = asyncHandler(async (req, res) => {
 });
 
 
-
+module.exports = {
+    createChat,
+    getUserChats,
+    getChatById,
+    updateChat,
+    deleteChat,
+    addMessageToChat,
+    getChatMessages,
+    searchChats,
+}
 
 
 
