@@ -104,6 +104,18 @@ const updateChat = asyncHandler(async (req, res) => {
 
 });
 
+const deleteChat = asyncHandler(async (req, res) => {
+    const { chatId } = req.params;
+
+
+    await prisma.chat.delete({
+        where: { id: parseInt(chatId) },
+    });
+
+    return res.status(200).json({ message: 'Chat deleted successfully' });
+
+});
+
 
 
 
