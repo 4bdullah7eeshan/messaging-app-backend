@@ -40,6 +40,29 @@ const createChat = asyncHandler(async (req, res) => {
   res.status(201).json({ message: 'Private chat created', chat });
 });
 
-
+const getUserChats = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+  
+    
+      const chats = await prisma.chat.findMany({
+        where: {
+          participants: {
+            some: { id: parseInt(userId) },
+          },
+        },
+        include: {
+          participants: true,
+          group: true,
+          messages: {
+            take: 1,
+            orderBy: { createdAt: 'desc' },
+          },
+        },
+      });
+  
+      return res.status(200).json({ message: 'Chats fetched successfully', chats });
+    
+  });
+  
 
 
