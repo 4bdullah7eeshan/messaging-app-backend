@@ -134,6 +134,23 @@ const addMessageToChat = asyncHandler(async (req, res) => {
 
 });
 
+const getChatMessages = asyncHandler(async (req, res) => {
+    const { chatId } = req.params;
+    const { take = 20, skip = 0 } = req.query;
+
+
+    const messages = await prisma.message.findMany({
+        where: { chatId: parseInt(chatId) },
+        take: parseInt(take),
+        skip: parseInt(skip),
+        orderBy: { createdAt: 'desc' },
+    });
+
+    return res.status(200).json({ message: 'Messages fetched successfully', messages });
+
+});
+
+
 
 
 
