@@ -79,7 +79,14 @@ const getUserChats = asyncHandler(async (req, res) => {
         };
     });
 
-    return res.status(200).json({ message: 'Chats fetched successfully', chats: formattedChats });
+    const sortedChats = formattedChats.sort((a, b) => {
+        const dateA = new Date(a.updatedAt);
+        const dateB = new Date(b.updatedAt);
+        return dateB - dateA; // Sort descending
+    });
+
+
+    return res.status(200).json({ message: 'Chats fetched successfully', chats: sortedChats });
 });
 
 
