@@ -14,6 +14,7 @@ const friendRouter = require("./routes/friendRoutes");
 const friendRequestRouter = require("./routes/friendRequestRoutes");
 const groupRouter = require("./routes/groupRoutes");
 const messageRouter = require("./routes/messageRoutes");
+const chatRouter = require("./routes/chatRoutes");
 const { authenticateSocket } = require("./middlewares/authenticateSocket"); // Custom middleware for socket authentication
 
 
@@ -58,7 +59,7 @@ app.use("/groups", groupRouter);
 app.use("/friends", friendRouter);
 app.use("/friend_requests", friendRequestRouter);
 app.use("/messages", messageRouter);
-
+app.use("/chats", chatRouter);
 // // 404 Handler
 // app.use((req, res, next) => {
 //     res.status(404).json({ message: "Route not found" });

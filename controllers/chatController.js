@@ -5,7 +5,6 @@ const cloudinary = require("../config/cloudinary");
 
 const prisma = new PrismaClient();
 
-const asyncHandler = require("express-async-handler");
 
 const createChat = asyncHandler(async (req, res) => {
     const { type, groupId, participantIds } = req.body;
@@ -35,6 +34,9 @@ const createChat = asyncHandler(async (req, res) => {
                 connect: participantIds.map((id) => ({ id })),
             },
         },
+        include: {
+            participants: true,
+        },
     });
 
     res.status(201).json({ message: 'Private chat created', chat });
@@ -43,7 +45,6 @@ const createChat = asyncHandler(async (req, res) => {
 const getUserChats = asyncHandler(async (req, res) => {
     const { userId } = req.params;
 
-
     const chats = await prisma.chat.findMany({
         where: {
             participants: {
@@ -51,18 +52,36 @@ const getUserChats = asyncHandler(async (req, res) => {
             },
         },
         include: {
-            participants: true,
+            participants: {
+                where: { id: { not: parseInt(userId) } },
+                select: {
+                    id: true,
+                    username: true,
+                    displayName: true,
+                    avatarUrl: true,
+                },
+            },
             group: true,
             messages: {
                 take: 1,
-                orderBy: { createdAt: 'desc' },
+                orderBy: { timeStamp: 'desc' },
             },
         },
     });
 
-    return res.status(200).json({ message: 'Chats fetched successfully', chats });
+    const formattedChats = chats.map(chat => {
+        const receiver = chat.participants[0];
+        return {
+            ...chat,
+            receiver,
+            lastMessage: chat.messages.length > 0 ? chat.messages[0].content : '',
+            updatedAt: chat.messages.length > 0 ? chat.messages[0].timeStamp : null,
+        };
+    });
 
+    return res.status(200).json({ message: 'Chats fetched successfully', chats: formattedChats });
 });
+
 
 const getChatById = asyncHandler(async (req, res) => {
     const { chatId } = req.params;
@@ -73,7 +92,10 @@ const getChatById = asyncHandler(async (req, res) => {
         include: {
             participants: true,
             group: true,
-            messages: true,
+            messages: {
+                take: 1,
+                orderBy: { timeStamp: 'desc' },
+            },
         },
     })
 
@@ -126,7 +148,7 @@ const addMessageToChat = asyncHandler(async (req, res) => {
             chatId: parseInt(chatId),
             senderId,
             content,
-            imageUrl,
+            imageUrl: imageUrl || null,
         },
     });
 
@@ -135,20 +157,44 @@ const addMessageToChat = asyncHandler(async (req, res) => {
 });
 
 const getChatMessages = asyncHandler(async (req, res) => {
-    const { chatId } = req.params;
-    const { take = 20, skip = 0 } = req.query;
+    const chatId = parseInt(req.params.chatId, 10);
+    if (isNaN(chatId)) {
+        return res.status(400).json({ message: 'Invalid chatId' });
+    }
 
+    const take = parseInt(req.query.take, 10) || 20;
+    const skip = parseInt(req.query.skip, 10) || 0;
 
-    const messages = await prisma.message.findMany({
-        where: { chatId: parseInt(chatId) },
-        take: parseInt(take),
-        skip: parseInt(skip),
-        orderBy: { createdAt: 'desc' },
-    });
+    console.log(chatId);
 
-    return res.status(200).json({ message: 'Messages fetched successfully', messages });
+    try {
+        const chat = await prisma.chat.findUnique({
+            where: {
+                id: chatId,
+            },
+            include: {
+                messages: {
+                    take,
+                    skip,
+                    orderBy: { timeStamp: 'desc' },
+                },
+            },
+        });
 
+        if (!chat) {
+            return res.status(404).json({ message: 'Chat not found' });
+        }
+
+        return res.status(200).json({
+            message: 'Messages fetched successfully',
+            messages: chat.messages,
+        });
+    } catch (error) {
+        console.error('Error fetching chat messages:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
 });
+
 
 const searchChats = asyncHandler(async (req, res) => {
     const { userId } = req.params;
