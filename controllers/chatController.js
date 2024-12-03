@@ -176,7 +176,7 @@ const getChatMessages = asyncHandler(async (req, res) => {
                 messages: {
                     take,
                     skip,
-                    orderBy: { timeStamp: 'desc' },
+                    orderBy: { timeStamp: 'asc' },
                 },
             },
         });
