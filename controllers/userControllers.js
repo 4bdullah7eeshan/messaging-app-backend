@@ -295,6 +295,10 @@ const verifyToken = asyncHandler(async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        // if (user.token !== token) {
+        //     return res.status(401).json({ message: "Token is no longer valid" });
+        // }
+
         res.status(200).json({ user });
     } catch (err) {
         res.status(401).json({ message: "Invalid token" });
