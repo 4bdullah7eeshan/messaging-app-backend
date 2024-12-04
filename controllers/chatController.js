@@ -69,15 +69,29 @@ const getUserChats = asyncHandler(async (req, res) => {
         },
     });
 
+    // const formattedChats = chats.map(chat => {
+    //     const receiver = chat.participants[0];
+    //     return {
+    //         ...chat,
+    //         receiver,
+    //         lastMessage: chat.messages.length > 0 ? chat.messages[0].content : '',
+    //         updatedAt: chat.messages.length > 0 ? chat.messages[0].timeStamp : null,
+    //     };
+    // });
+
     const formattedChats = chats.map(chat => {
         const receiver = chat.participants[0];
+        const lastMessage = chat.messages.length > 0 ? chat.messages[0] : null;
         return {
             ...chat,
             receiver,
-            lastMessage: chat.messages.length > 0 ? chat.messages[0].content : '',
-            updatedAt: chat.messages.length > 0 ? chat.messages[0].timeStamp : null,
+            lastMessage,
+            updatedAt: lastMessage ? lastMessage.timeStamp : null,
         };
     });
+    
+    
+    
 
     const sortedChats = formattedChats.sort((a, b) => {
         const dateA = new Date(a.updatedAt);
