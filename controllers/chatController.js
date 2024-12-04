@@ -198,6 +198,8 @@ const addMessageToChat = asyncHandler(async (req, res) => {
         },
     });
 
+    console.log(message);
+
     return res.status(201).json({ message: 'Message added successfully', message });
 
 });
