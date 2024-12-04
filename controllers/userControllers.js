@@ -141,7 +141,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
             isOnline: true,
             lastActive: true,
             createdAt: true,
-            
+
         },
     });
 
@@ -273,6 +273,35 @@ const deleteUser = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "User deleted successfully" });
 });
 
+
+const verifyToken = asyncHandler(async (req, res) => {
+    const authHeader = req.headers.authorization;
+    console.log(authHeader);
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ message: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    console.log(token);
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log(decoded);
+        console.log(decoded.id);
+        const user = await prisma.user.findUnique({ where: { id: parseInt(decoded.userId) } });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ user });
+    } catch (err) {
+        res.status(401).json({ message: "Invalid token" });
+    }
+});
+
+
 module.exports = {
     createUser,
     loginUser,
@@ -284,4 +313,5 @@ module.exports = {
     deleteUser,
     getLoggedInUser,
     upload,
+    verifyToken,
 }
