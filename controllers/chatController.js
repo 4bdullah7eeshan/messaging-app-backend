@@ -214,9 +214,6 @@ const getChatMessages = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: 'Invalid chatId' });
     }
 
-    const take = parseInt(req.query.take, 10) || 20;
-    const skip = parseInt(req.query.skip, 10) || 0;
-
     console.log(chatId);
 
     try {
@@ -226,8 +223,6 @@ const getChatMessages = asyncHandler(async (req, res) => {
             },
             include: {
                 messages: {
-                    take,
-                    skip,
                     orderBy: { timeStamp: 'asc' },
                 },
             },
