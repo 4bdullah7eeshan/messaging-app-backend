@@ -12,7 +12,7 @@ chatRouter.get("/:chatId", authenticateJwt, chatControllers.getChatById);
 chatRouter.patch("/:chatId", authenticateJwt, chatControllers.updateChat);
 chatRouter.delete("/:chatId", authenticateJwt, chatControllers.deleteChat);
 chatRouter.get("/m/:chatId", authenticateJwt, chatControllers.getChatMessages);
-chatRouter.post("/m/:chatId", authenticateJwt, chatControllers.addMessageToChat);
+chatRouter.post("/m/:chatId", authenticateJwt, chatControllers.upload.single("file"), chatControllers.addMessageToChat);
 chatRouter.get("/user/:userId/search?query=<query>", authenticateJwt, chatControllers.searchChats);
 
 module.exports = chatRouter;

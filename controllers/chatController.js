@@ -1,7 +1,14 @@
 const asyncHandler = require("express-async-handler");
 const { PrismaClient } = require("@prisma/client");
+const multer = require("multer");
 
 const cloudinary = require("../config/cloudinary");
+
+const storage = multer.memoryStorage();
+
+
+const upload = multer({ storage: storage });
+
 
 const prisma = new PrismaClient();
 
@@ -161,19 +168,41 @@ const deleteChat = asyncHandler(async (req, res) => {
 
 const addMessageToChat = asyncHandler(async (req, res) => {
     const { chatId } = req.params;
-    const { senderId, content, imageUrl } = req.body;
+    const { senderId, content } = req.body;
+    const file = req.file;
+    console.log(file);
+    let fileUrl = null;
 
+    if(file) {
+        const uploadResult = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+                { folder: "uploads", resource_type: "auto" },
+                (error, result) => {
+                    if (error) return reject(error);
+                    resolve(result);
+                }
+            ).end(req.file.buffer);
+        });
+    
+        fileUrl = uploadResult.secure_url;
+    }
+
+    console.log(fileUrl);
 
     const message = await prisma.message.create({
         data: {
             chatId: parseInt(chatId),
-            senderId,
+            senderId: parseInt(senderId),
             content,
-            imageUrl: imageUrl || null,
+            imageUrl: fileUrl || null,
         },
     });
 
     return res.status(201).json({ message: 'Message added successfully', message });
+
+});
+
+const addFileToChat = asyncHandler(async (req, res) => {
 
 });
 
@@ -252,6 +281,7 @@ module.exports = {
     addMessageToChat,
     getChatMessages,
     searchChats,
+    upload,
 }
 
 
