@@ -8,7 +8,7 @@ const friendRouter = Router();
 
 // Get all friends of a user
 friendRouter.get(
-    "/",
+    "/u/:userId",
     authenticateJwt,
     friendControllers.getAllFriends
 );
@@ -20,6 +20,12 @@ friendRouter.delete(
     friendValidations.validateDeleteFriend,
     friendControllers.deleteFriend
 );
+
+friendRouter.get(
+    "/u/f/:id",
+    authenticateJwt,
+    friendControllers.checkFriendStatus
+)
 
 
 module.exports = friendRouter;

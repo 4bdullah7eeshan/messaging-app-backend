@@ -7,7 +7,7 @@ const friendRequestRouter = Router();
 
 // Fetch all incoming and outgoing friend requests
 friendRequestRouter.get(
-    "/", 
+    "/user/:userId", 
     authenticateJwt, 
     friendRequestControllers.getAllFriendRequests
 );
@@ -22,22 +22,21 @@ friendRequestRouter.post(
 
 // Get details of a specific friend request
 friendRequestRouter.get(
-    "/:requestId", 
+    "/receive/:requestId", 
     authenticateJwt, 
     friendRequestControllers.getFriendRequest
 );
 
 // Accept a specific friend request
 friendRequestRouter.patch(
-    "/:requestId/accept", 
+    "/accept/:requestId",
     authenticateJwt, 
-    friendValidations.validateAcceptFriendRequest, 
     friendRequestControllers.acceptFriendRequest
 );
 
 // Reject a specific friend request
 friendRequestRouter.delete(
-    "/:requestId/reject", 
+    "/reject/:requestId", 
     authenticateJwt, 
     friendValidations.validateRejectFriendRequest, 
     friendRequestControllers.rejectFriendRequest

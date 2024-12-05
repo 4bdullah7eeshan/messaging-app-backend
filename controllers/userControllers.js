@@ -61,6 +61,12 @@ const loginUser = asyncHandler(async (req, res) => {
         return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // Update online status
+    await prisma.user.update({
+        where: { id: user.id },
+        data: { isOnline: true },
+    });
+
     // Generate a JWT
     try {
         const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: jwtExpiry });
@@ -79,12 +85,26 @@ const logoutUser = asyncHandler(async (req, res) => {
         return res.status(401).json({ message: "User is not authenticated" });
     }
 
-    req.logout((err) => {
-        if (err) {
-            return res.status(500).json({ message: "Logout failed", error: err });
-        }
-        res.status(200).json({ message: "User logged out successfully" });
-    });
+    const userId = req.userId;
+
+
+
+     try {
+        // Update the user's online status
+        await prisma.user.update({
+            where: { id: userId },
+            data: { isOnline: false },
+        });
+
+        req.logout((err) => {
+            if (err) {
+                return res.status(500).json({ message: "Logout failed", error: err });
+            }
+            res.status(200).json({ message: "User logged out successfully" });
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Error during logout", error });
+    }
 });
 
 
@@ -141,6 +161,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
             isOnline: true,
             lastActive: true,
             createdAt: true,
+            friends: true,
 
         },
     });

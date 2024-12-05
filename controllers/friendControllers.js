@@ -5,16 +5,18 @@ const prisma = new PrismaClient();
 
 // Send Friend Request
 const sendFriendRequest = asyncHandler(async (req, res) => {
-    const senderId = req.user.id;
+    const senderId = parseInt(req.user.userId);
     const receiverId = parseInt(req.params.receiverId);
     const io = req.app.get("io");
+    console.log(senderId);
+    console.log(receiverId);
 
     if (senderId === receiverId) {
         return res.status(400).json({ message: "You cannot send a friend request to yourself." });
     }
 
-    const senderExists = await prisma.user.findUnique({ where: { id: senderId } });
-    const receiverExists = await prisma.user.findUnique({ where: { id: receiverId } });
+    const senderExists = await prisma.user.findUnique({ where: { id: senderId }, select: { id: true } });
+    const receiverExists = await prisma.user.findUnique({ where: { id: receiverId }, select: { id: true } });
 
     if (!senderExists || !receiverExists) {
         return res.status(400).json({ message: "One or both users do not exist." });
@@ -67,7 +69,7 @@ const getFriendRequest = asyncHandler(async (req, res) => {
 // Accept Friend Request
 const acceptFriendRequest = asyncHandler(async (req, res) => {
     const requestId = parseInt(req.params.requestId);
-    const userId = req.user.id;
+    const userId = parseInt(req.user.userId);
     const io = req.app.get("io");
 
     const friendRequest = await prisma.friend.findUnique({
@@ -94,7 +96,7 @@ const acceptFriendRequest = asyncHandler(async (req, res) => {
 // Reject Friend Request
 const rejectFriendRequest = asyncHandler(async (req, res) => {
     const requestId = parseInt(req.params.requestId);
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const friendRequest = await prisma.friend.findUnique({
         where: { id: requestId },
@@ -118,7 +120,7 @@ const rejectFriendRequest = asyncHandler(async (req, res) => {
 
 // Delete Friend
 const deleteFriend = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const friendId = parseInt(req.params.friendId);
 
     const friendship = await prisma.friend.findFirst({
@@ -145,7 +147,7 @@ const deleteFriend = asyncHandler(async (req, res) => {
 
 // Get All Friend Requests
 const getAllFriendRequests = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const incomingRequests = await prisma.friend.findMany({
         where: { friendId: userId, status: "PENDING" },
@@ -162,7 +164,7 @@ const getAllFriendRequests = asyncHandler(async (req, res) => {
 
 // Get All Friends
 const getAllFriends = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const friends = await prisma.friend.findMany({
         where: {
@@ -181,8 +183,43 @@ const getAllFriends = asyncHandler(async (req, res) => {
         friendship.userId === userId ? friendship.friend : friendship.user
     );
 
+    
+
     res.status(200).json(friendList);
 });
+
+const checkFriendStatus = async (req, res) => {
+    try {
+      const userId = req.user.userId; // Authenticated user's ID
+      const friendId = parseInt(req.params.id); // ID of the user to check friendship with
+  
+      if (!friendId || userId === friendId) {
+        return res.status(400).json({ error: 'Invalid friend ID' });
+      }
+  
+      // Query the Friend model to check the friendship status
+      const friendship = await prisma.friend.findFirst({
+        where: {
+          OR: [
+            { userId, friendId },
+            { userId: friendId, friendId: userId },
+          ],
+        },
+      });
+  
+      if (friendship) {
+        return res.status(200).json({
+          isFriend: friendship.status === 'ACCEPTED',
+          status: friendship.status,
+        });
+      } else {
+        return res.status(200).json({ isFriend: false, status: 'NONE' });
+      }
+    } catch (error) {
+      console.error('Error checking friendship status:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
 
 module.exports = {
     sendFriendRequest,
@@ -192,4 +229,5 @@ module.exports = {
     deleteFriend,
     getAllFriendRequests,
     getAllFriends,
+    checkFriendStatus,
 };
