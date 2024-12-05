@@ -3,11 +3,11 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
+// Send Friend Request
 const sendFriendRequest = asyncHandler(async (req, res) => {
     const senderId = req.user.id;
     const receiverId = parseInt(req.params.receiverId);
     const io = req.app.get("io");
-
 
     if (senderId === receiverId) {
         return res.status(400).json({ message: "You cannot send a friend request to yourself." });
@@ -24,14 +24,11 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
         where: {
             OR: [
                 { userId: senderId, friendId: receiverId },
-                { userId: receiverId, friendId: senderId }
+                { userId: receiverId, friendId: senderId },
             ],
         },
     });
 
-    // Check if a friend request already exists.
-    // If this is the case, then it means that either they are friends or there is a pending request.
-    // Handle these two cases later if needed.
     if (existingRequest) {
         return res.status(400).json({ message: "You are already friends or have a pending request." });
     }
@@ -44,20 +41,20 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
     });
 
     io.to(receiverId).emit("friend-request-received", {
-        senderId: req.user.id,
+        senderId: senderId,
         request: friendRequest,
     });
 
     res.status(201).json({ message: "Friend request sent", friendRequest });
 });
 
-
+// Get a Single Friend Request
 const getFriendRequest = asyncHandler(async (req, res) => {
     const requestId = parseInt(req.params.requestId);
 
     const friendRequest = await prisma.friend.findUnique({
         where: { id: requestId },
-        include: { user: true, friend: true }
+        include: { user: true, friend: true },
     });
 
     if (!friendRequest) {
@@ -67,11 +64,11 @@ const getFriendRequest = asyncHandler(async (req, res) => {
     res.status(200).json(friendRequest);
 });
 
+// Accept Friend Request
 const acceptFriendRequest = asyncHandler(async (req, res) => {
     const requestId = parseInt(req.params.requestId);
     const userId = req.user.id;
     const io = req.app.get("io");
-
 
     const friendRequest = await prisma.friend.findUnique({
         where: { id: requestId },
@@ -85,16 +82,16 @@ const acceptFriendRequest = asyncHandler(async (req, res) => {
         return res.status(403).json({ message: "You are not authorized to accept this request." });
     }
 
-    await prisma.friend.update({ where: { id: requestId } });
+    const updatedRequest = await prisma.friend.update({
+        where: { id: requestId },
+        data: { status: "ACCEPTED" },
+    });
 
-    io.to(senderId).emit("friend-request-accepted", { receiverId });
-    io.to(receiverId).emit("friendship-created", { senderId });
-
-
-    res.status(200).json({ message: "Friend request accepted." });
+    io.to(friendRequest.userId).emit("friend-request-accepted", { receiverId: userId });
+    res.status(200).json({ message: "Friend request accepted.", updatedRequest });
 });
 
-
+// Reject Friend Request
 const rejectFriendRequest = asyncHandler(async (req, res) => {
     const requestId = parseInt(req.params.requestId);
     const userId = req.user.id;
@@ -111,13 +108,15 @@ const rejectFriendRequest = asyncHandler(async (req, res) => {
         return res.status(403).json({ message: "You are not authorized to reject this request." });
     }
 
-    await prisma.friend.delete({
+    await prisma.friend.update({
         where: { id: requestId },
+        data: { status: "DECLINED" },
     });
 
     res.status(200).json({ message: "Friend request rejected." });
 });
 
+// Delete Friend
 const deleteFriend = asyncHandler(async (req, res) => {
     const userId = req.user.id;
     const friendId = parseInt(req.params.friendId);
@@ -125,8 +124,8 @@ const deleteFriend = asyncHandler(async (req, res) => {
     const friendship = await prisma.friend.findFirst({
         where: {
             OR: [
-                { userId: userId, friendId: friendId },
-                { userId: friendId, friendId: userId },
+                { userId: userId, friendId: friendId, status: "ACCEPTED" },
+                { userId: friendId, friendId: userId, status: "ACCEPTED" },
             ],
         },
     });
@@ -144,53 +143,46 @@ const deleteFriend = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "Friendship deleted." });
 });
 
-
+// Get All Friend Requests
 const getAllFriendRequests = asyncHandler(async (req, res) => {
     const userId = req.user.id;
 
-    // Fetch pending incoming requests
     const incomingRequests = await prisma.friend.findMany({
-        where: { friendId: userId },
+        where: { friendId: userId, status: "PENDING" },
         include: { user: true },
     });
 
-    // Fetch pending outgoing requests
     const outgoingRequests = await prisma.friend.findMany({
-        where: { userId: userId },
+        where: { userId: userId, status: "PENDING" },
         include: { friend: true },
     });
 
     res.status(200).json({ incomingRequests, outgoingRequests });
 });
 
+// Get All Friends
 const getAllFriends = asyncHandler(async (req, res) => {
     const userId = req.user.id;
 
-    // Fetch all accepted friendships where the user is either the `userId` or `friendId`.
     const friends = await prisma.friend.findMany({
         where: {
             OR: [
-                { userId: userId },
-                { friendId: userId },
+                { userId: userId, status: "ACCEPTED" },
+                { friendId: userId, status: "ACCEPTED" },
             ],
         },
         include: {
-            user: true, // Include user details for friends where userId is the friend.
-            friend: true, // Include friend details for friends where friendId is the friend.
+            user: true,
+            friend: true,
         },
     });
 
-    // Transform the results to get a consistent list of friends (excluding self-references).
-    const friendList = friends.map((friendship) => {
-        if (friendship.userId === userId) {
-            return friendship.friend; // The other person is the friend.
-        }
-        return friendship.user; // The other person is the user.
-    });
+    const friendList = friends.map((friendship) =>
+        friendship.userId === userId ? friendship.friend : friendship.user
+    );
 
     res.status(200).json(friendList);
 });
-
 
 module.exports = {
     sendFriendRequest,
@@ -200,4 +192,4 @@ module.exports = {
     deleteFriend,
     getAllFriendRequests,
     getAllFriends,
-}
+};
