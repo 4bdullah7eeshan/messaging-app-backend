@@ -80,17 +80,17 @@ const loginUser = asyncHandler(async (req, res) => {
 
 
 const logoutUser = asyncHandler(async (req, res) => {
-    // No need to search db, just check authentication. 401 coz auth.
     if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "User is not authenticated" });
     }
 
-    const userId = req.userId;
+    const userId = req.user.userId;
+
+    console.log(userId);
 
 
 
-     try {
-        // Update the user's online status
+    try {
         await prisma.user.update({
             where: { id: userId },
             data: { isOnline: false },

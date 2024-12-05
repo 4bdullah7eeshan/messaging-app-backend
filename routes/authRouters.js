@@ -10,7 +10,7 @@ const authRouter = Router();
 
 authRouter.post("/sign-up", userValidations.validateCreateUser, userControllers.createUser);
 authRouter.post("/sign-in", userValidations.validateLoginUser, passport.authenticate("local"), userControllers.loginUser);
-authRouter.post("/sign-out", userControllers.logoutUser);
+authRouter.post("/sign-out", authenticateJwt, userControllers.logoutUser);
 authRouter.get("/verify-token", userControllers.verifyToken);
 
 module.exports = authRouter;
