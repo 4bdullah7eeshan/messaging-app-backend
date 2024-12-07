@@ -32,6 +32,7 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
     });
 
     if (existingRequest) {
+        console.log("??");
         return res.status(400).json({ message: "You are already friends or have a pending request." });
     }
 
@@ -183,7 +184,7 @@ const getAllFriends = asyncHandler(async (req, res) => {
         friendship.userId === userId ? friendship.friend : friendship.user
     );
 
-    
+
 
     res.status(200).json(friendList);
 });
